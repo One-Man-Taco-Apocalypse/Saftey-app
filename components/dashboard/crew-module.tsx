@@ -1,21 +1,33 @@
 import { redirect } from "next/navigation";
+import { getCrewDocuments } from "@/lib/crew-documents";
 import { getCrewIds, getPeople } from "@/lib/people";
+import { getAllTemplates } from "@/lib/submissions";
 import { getCurrentUser } from "@/lib/user";
 import { Module } from "./module-grid";
 import { CrewModuleClient } from "./crew-module-client";
 
-// Loads everyone + the user's crew on the server, then hands them to the
-// interactive card.
+// Loads everyone + the user's crew + the crew's documents from the last 12 hours
+// on the server, then hands them to the interactive card.
 export async function CrewModule() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
-  const [people, crewIds] = await Promise.all([
+  const [people, crewIds, templates] = await Promise.all([
     getPeople(),
     getCrewIds(user.id),
+    getAllTemplates(),
   ]);
+  const crewDocuments = await getCrewDocuments(crewIds);
+  const templateNames = Object.fromEntries(templates.map((t) => [t.id, t.name]));
+
   return (
-    <CrewModuleClient userId={user.id} people={people} initialCrew={crewIds} />
+    <CrewModuleClient
+      userId={user.id}
+      people={people}
+      initialCrew={crewIds}
+      crewDocuments={crewDocuments}
+      templateNames={templateNames}
+    />
   );
 }
 

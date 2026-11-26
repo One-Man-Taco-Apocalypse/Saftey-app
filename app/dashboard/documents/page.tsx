@@ -1,12 +1,15 @@
-import { ChevronRight, FilePlus2, FileText } from "lucide-react";
+import { ChevronRight, Clock, FilePlus2, FileText } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { GlassCard } from "@/components/dashboard/glass-card";
+import { ClearAllDocuments } from "@/components/documents/clear-all-documents";
 import { LocalDate } from "@/components/local-date";
+import { formatDocumentNumber } from "@/lib/documents";
 import { personName } from "@/lib/person";
 import { getPeople } from "@/lib/people";
 import { getProjects } from "@/lib/projects";
+import { getSignatureProgress, isAwaitingSignatures } from "@/lib/signatures";
 import { getAllTemplates, getSubmissions, lookup } from "@/lib/submissions";
 
 async function SubmissionList() {
@@ -16,6 +19,7 @@ async function SubmissionList() {
     getProjects(),
     getPeople(),
   ]);
+  const progress = await getSignatureProgress(submissions.map((s) => s.id));
   const templateById = lookup(templates, (t) => t.id);
   const projectByJob = lookup(projects, (p) => p.job_number);
   const personById = lookup(people, (p) => p.user_id);
@@ -50,16 +54,31 @@ async function SubmissionList() {
             </span>
 
             <span className="min-w-0 flex-1">
-              <span className="block truncate font-medium">{title}</span>
+              <span className="block truncate font-medium">
+                <span className="mr-1.5 tabular-nums text-muted-foreground">
+                  {formatDocumentNumber(s.document_number)}
+                </span>
+                {title}
+              </span>
               <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
                 <span className="rounded-full bg-sky-500/10 px-2 py-0.5 font-medium text-sky-700 dark:text-sky-300">
                   {template?.name ?? "Unknown template"}
                 </span>
+                {isAwaitingSignatures(progress.get(s.id)) && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-800 dark:text-amber-300">
+                    <Clock className="h-3 w-3" />
+                    Awaiting signatures {progress.get(s.id)!.signed}/{progress.get(s.id)!.total}
+                  </span>
+                )}
                 {s.job_number && (
                   <span className="truncate">
                     {project?.job_name ?? s.job_number} · {s.job_number}
                   </span>
                 )}
+                {/* On phones the right-hand column is hidden, so show the time here */}
+                <span className="sm:hidden">
+                  <LocalDate iso={s.submitted_at} withTime />
+                </span>
               </span>
             </span>
 
@@ -70,7 +89,7 @@ async function SubmissionList() {
                   {person ? personName(person) : "Unknown"}
                 </span>
               </span>
-              <LocalDate iso={s.submitted_at} />
+              <LocalDate iso={s.submitted_at} withTime />
             </span>
 
             <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
@@ -111,6 +130,9 @@ export default function DocumentsPage() {
         <Suspense fallback={<ListSkeleton />}>
           <SubmissionList />
         </Suspense>
+
+        {/* TEMPORARY: testing tool, remove later (see the component) */}
+        <ClearAllDocuments />
       </GlassCard>
     </div>
   );

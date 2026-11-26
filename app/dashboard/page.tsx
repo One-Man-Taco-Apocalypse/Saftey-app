@@ -13,6 +13,10 @@ import {
   CrewModule,
   CrewModuleSkeleton,
 } from "@/components/dashboard/crew-module";
+import {
+  SignaturesModule,
+  SignaturesModuleSkeleton,
+} from "@/components/dashboard/signatures-module";
 
 export default function DashboardPage() {
   return (
@@ -29,6 +33,9 @@ export default function DashboardPage() {
         </Suspense>
         <Suspense fallback={<CrewModuleSkeleton />}>
           <CrewModule />
+        </Suspense>
+        <Suspense fallback={<SignaturesModuleSkeleton />}>
+          <SignaturesModule />
         </Suspense>
 
         {/* Add more modules here, e.g.

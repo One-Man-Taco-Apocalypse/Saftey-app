@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { GlassCard } from "@/components/dashboard/glass-card";
 import { DocumentForm } from "@/components/documents/document-form";
-import { getPeople } from "@/lib/people";
+import { getCrewIds, getPeople } from "@/lib/people";
 import { getProjects, getProjectSettings } from "@/lib/projects";
 import { getLatestVersion, getTemplate } from "@/lib/templates";
 import { getCurrentUser } from "@/lib/user";
@@ -14,12 +14,13 @@ async function FillDocument({ params }: { params: Promise<{ templateId: string }
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
-  const [template, version, projects, settings, people] = await Promise.all([
+  const [template, version, projects, settings, people, crewIds] = await Promise.all([
     getTemplate(templateId),
     getLatestVersion(templateId),
     getProjects(),
     getProjectSettings(user.id),
     getPeople(),
+    getCrewIds(user.id),
   ]);
   if (!template || !version) notFound();
 
@@ -37,6 +38,7 @@ async function FillDocument({ params }: { params: Promise<{ templateId: string }
           currentJob={settings.current}
           people={people}
           currentUserId={user.id}
+          crewIds={crewIds}
         />
       </div>
     </>

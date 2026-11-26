@@ -1,13 +1,123 @@
 "use client";
 
-import { Mail, Pencil, Search, UserMinus, UserPlus, Users } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Mail,
+  Pencil,
+  Search,
+  Send,
+  UserMinus,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@/components/avatar";
+import { LocalDate } from "@/components/local-date";
+import type { CrewDocument } from "@/lib/crew-documents";
+import { formatDocumentNumber } from "@/lib/documents";
 import { personName, type Person } from "@/lib/person";
 import { saveUserSettings } from "@/lib/save-settings";
 import { cn } from "@/lib/utils";
+import { SignatureRequestsLiveRefresh } from "./live-refresh";
 import { Module } from "./module-grid";
 import { PopupButton } from "./popup";
+
+// One crew member's documents from the last 12 hours, grouped by document type,
+// each with THAT person's status: Complete, Waiting signature, or Requested (asked
+// to complete this type of document and not done yet).
+function CrewMemberDocuments({
+  documents,
+  templateNames,
+}: {
+  documents: CrewDocument[];
+  templateNames: Record<string, string>;
+}) {
+  if (documents.length === 0) {
+    return (
+      <p className="px-1 text-xs text-muted-foreground">
+        No documents in the last 12 hours, and nothing requested
+      </p>
+    );
+  }
+
+  const typeName = (d: CrewDocument) => templateNames[d.templateId] ?? "Document";
+  // Group by type (A-Z); newest first within a type
+  const sorted = [...documents].sort(
+    (a, b) =>
+      typeName(a).localeCompare(typeName(b)) ||
+      // within a type: requests first (still to do), then newest first
+      Number(b.status === "requested") - Number(a.status === "requested") ||
+      b.at.localeCompare(a.at),
+  );
+  const groups: { name: string; docs: CrewDocument[] }[] = [];
+  for (const d of sorted) {
+    const last = groups[groups.length - 1];
+    if (last?.name === typeName(d)) last.docs.push(d);
+    else groups.push({ name: typeName(d), docs: [d] });
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {groups.map((group) => (
+        <div key={group.name}>
+          <p className="px-1 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
+            {group.name}
+          </p>
+          <ul className="mt-0.5 flex flex-col">
+            {group.docs.map((d) => (
+              <li key={d.key}>
+                <Link
+                  href={d.href}
+                  className="flex items-center gap-2 rounded-lg px-1 py-1 text-xs transition hover:bg-foreground/5"
+                >
+                  {d.status === "requested" ? (
+                    <span className="min-w-0 flex-1 truncate">
+                      Not started
+                      {d.fromNumber !== null && d.fromNumber !== undefined && (
+                        <span className="ml-1 text-muted-foreground">
+                          · asked on {formatDocumentNumber(d.fromNumber)}
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="min-w-0 flex-1 truncate">
+                      <span className="mr-1 tabular-nums text-muted-foreground">
+                        {formatDocumentNumber(d.documentNumber)}
+                      </span>
+                      {d.title || group.name}
+                      <span className="ml-1 text-muted-foreground">
+                        · <LocalDate iso={d.at} timeOnly />
+                      </span>
+                    </span>
+                  )}
+                  {d.status === "requested" ? (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sky-500/15 px-2 py-0.5 font-medium text-sky-800 dark:text-sky-300">
+                      <Send className="h-3 w-3" />
+                      Requested
+                    </span>
+                  ) : d.status === "complete" ? (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 font-medium text-emerald-700 dark:text-emerald-300">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Complete
+                    </span>
+                  ) : (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-800 dark:text-amber-300">
+                      <Clock className="h-3 w-3" />
+                      Waiting signature
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // What shows inside a person's popup.
 function PersonDetails({ person }: { person: Person }) {
@@ -39,11 +149,16 @@ export function CrewModuleClient({
   userId,
   people,
   initialCrew,
+  crewDocuments,
+  templateNames,
 }: {
   userId: string;
   people: Person[];
   initialCrew: string[];
+  crewDocuments: Record<string, CrewDocument[]>; // per crew member, last 12 hours
+  templateNames: Record<string, string>;
 }) {
+  const router = useRouter();
   const [crewIds, setCrewIds] = useState<string[]>(initialCrew);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
@@ -61,6 +176,7 @@ export function CrewModuleClient({
     setSaving(false);
     setSaveError(error);
     if (error) setCrewIds(previous); // undo on the screen
+    else router.refresh(); // load documents for anyone just added
   }
 
   // Keep the order people were added in
@@ -174,30 +290,49 @@ export function CrewModuleClient({
         </PopupButton>
       </div>
 
-      {/* One small card per crew member; each opens that person's popup */}
+      {/* Live: updates as soon as a crew member signs, is asked to, or submits a
+          document; every 5 minutes it also re-checks the 12-hour window */}
+      <SignatureRequestsLiveRefresh
+        userIds={crewIds}
+        channelName="crew-documents"
+        includeSubmissions
+        includeRequests
+        refreshEveryMinutes={5}
+      />
+
+      {/* One card per crew member: their name (opens their popup), then their
+          documents from the last 12 hours with their own status on each */}
       {crew.length === 0 ? (
         <p className="mt-5 rounded-2xl border border-dashed border-foreground/15 p-4 text-center text-sm text-muted-foreground">
           No one on your crew yet
         </p>
       ) : (
-        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="mt-5 grid grid-cols-1 items-start gap-2 sm:grid-cols-2">
           {crew.map((person) => (
-            <PopupButton
+            <div
               key={person.user_id}
-              title={personName(person)}
-              popup={<PersonDetails person={person} />}
-              className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/50 p-3 hover:-translate-y-0.5 hover:bg-white/80 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+              className="flex flex-col gap-2 rounded-2xl border border-white/60 bg-white/50 p-2 dark:border-white/10 dark:bg-white/5"
             >
-              <Avatar color={person.color} className="h-8 w-8" />
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium">
-                  {personName(person)}
+              <PopupButton
+                title={personName(person)}
+                popup={<PersonDetails person={person} />}
+                className="flex items-center gap-3 p-1 hover:bg-white/60 dark:hover:bg-white/10"
+              >
+                <Avatar color={person.color} className="h-8 w-8" />
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">
+                    {personName(person)}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {person.position ?? person.email}
+                  </span>
                 </span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  {person.position ?? person.email}
-                </span>
-              </span>
-            </PopupButton>
+              </PopupButton>
+              <CrewMemberDocuments
+                documents={crewDocuments[person.user_id] ?? []}
+                templateNames={templateNames}
+              />
+            </div>
           ))}
         </div>
       )}

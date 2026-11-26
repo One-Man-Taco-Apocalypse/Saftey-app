@@ -14,7 +14,7 @@ export async function getSubmissions(limit = 200): Promise<DocumentSubmission[]>
   const { data, error } = await supabase
     .from("document_submissions")
     .select(
-      "id, template_id, template_version, job_number, submitted_by, submitted_at, updated_at, answers",
+      "id, document_number, template_id, template_version, job_number, submitted_by, submitted_at, updated_at, answers",
     )
     .order("submitted_at", { ascending: false })
     .limit(limit);
@@ -27,7 +27,7 @@ export async function getSubmission(id: string): Promise<DocumentSubmission | nu
   const { data, error } = await supabase
     .from("document_submissions")
     .select(
-      "id, template_id, template_version, job_number, submitted_by, submitted_at, updated_at, answers",
+      "id, document_number, template_id, template_version, job_number, submitted_by, submitted_at, updated_at, answers",
     )
     .eq("id", id)
     .maybeSingle();

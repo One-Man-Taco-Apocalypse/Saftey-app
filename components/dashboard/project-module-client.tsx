@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronRight, FolderKanban, Star } from "lucide-react";
+import { Check, ChevronRight, FolderKanban, Pencil, Star } from "lucide-react";
 import { useState } from "react";
 import { saveUserSettings } from "@/lib/save-settings";
 import type { Project } from "@/lib/projects";
@@ -93,7 +93,7 @@ export function ProjectModuleClient({
   const currentProject = projects.find((p) => p.job_number === current);
   const favoriteProjects = projects.filter((p) => favorites.includes(p.job_number));
 
-  // What shows inside the Projects popup: every project with a star.
+  // What shows inside the Change Project popup: every project with a star.
   // Clicking a project's name makes it current and closes the popup
   // (a submit button inside <form method="dialog"> closes its dialog).
   const projectList =
@@ -152,10 +152,9 @@ export function ProjectModuleClient({
           <p className="text-sm font-medium text-muted-foreground">
             Current Project:
           </p>
-          {/* Only the project name opens the project popup */}
+          {/* Only the project name opens the project popup (blank for now) */}
           <PopupButton
-            title="Projects"
-            popup={projectList}
+            title={currentProject?.job_name ?? "Project"}
             className="group -mx-2 mt-0.5 flex w-[calc(100%+1rem)] items-center gap-1 px-2"
           >
             <span
@@ -174,6 +173,16 @@ export function ProjectModuleClient({
             </p>
           )}
         </div>
+
+        {/* Opens the project list, where a project can be made current */}
+        <PopupButton
+          title="Change Project"
+          popup={projectList}
+          className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/70 bg-white/60 px-3 py-1.5 text-sm font-medium hover:bg-white/90 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          Change project
+        </PopupButton>
       </div>
 
       {/* Favorite projects. The heading opens the Favorite Projects popup;
