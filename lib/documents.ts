@@ -119,3 +119,10 @@ export type DocumentSubmission = {
 export function formatDocumentNumber(n: number | null | undefined) {
   return n === null || n === undefined ? "" : `#${n}`;
 }
+
+// A document's display title: its "title" answer if it has one, else the
+// fallback (usually the template's name).
+export function documentTitle(answers: Answers | null | undefined, fallback = "Document") {
+  const title = answers?.title;
+  return typeof title === "string" && title.trim() ? title : fallback;
+}

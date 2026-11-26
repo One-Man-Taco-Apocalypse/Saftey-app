@@ -1,16 +1,19 @@
-import { ChevronRight, Clock, FilePlus2, FileText } from "lucide-react";
+import { ChevronRight, FilePlus2, FileText } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { GlassCard } from "@/components/dashboard/glass-card";
 import { ClearAllDocuments } from "@/components/documents/clear-all-documents";
 import { LocalDate } from "@/components/local-date";
-import { formatDocumentNumber } from "@/lib/documents";
+import { StatusPill } from "@/components/status-pill";
+import { documentTitle, formatDocumentNumber } from "@/lib/documents";
 import { personName } from "@/lib/person";
 import { getPeople } from "@/lib/people";
 import { getProjects } from "@/lib/projects";
 import { getSignatureProgress, isAwaitingSignatures } from "@/lib/signatures";
-import { getAllTemplates, getSubmissions, lookup } from "@/lib/submissions";
+import { getSubmissions } from "@/lib/submissions";
+import { getAllTemplates } from "@/lib/templates";
+import { lookup } from "@/lib/utils";
 
 async function SubmissionList() {
   const [submissions, templates, projects, people] = await Promise.all([
@@ -38,10 +41,8 @@ async function SubmissionList() {
         const template = templateById.get(s.template_id);
         const project = s.job_number ? projectByJob.get(s.job_number) : undefined;
         const person = s.submitted_by ? personById.get(s.submitted_by) : undefined;
-        const title =
-          typeof s.answers.title === "string" && s.answers.title
-            ? s.answers.title
-            : template?.name ?? "Document";
+        const title = documentTitle(s.answers, template?.name);
+        const signing = progress.get(s.id);
 
         return (
           <Link
@@ -64,11 +65,10 @@ async function SubmissionList() {
                 <span className="rounded-full bg-sky-500/10 px-2 py-0.5 font-medium text-sky-700 dark:text-sky-300">
                   {template?.name ?? "Unknown template"}
                 </span>
-                {isAwaitingSignatures(progress.get(s.id)) && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-800 dark:text-amber-300">
-                    <Clock className="h-3 w-3" />
-                    Awaiting signatures {progress.get(s.id)!.signed}/{progress.get(s.id)!.total}
-                  </span>
+                {signing && isAwaitingSignatures(signing) && (
+                  <StatusPill tone="waiting" size="sm">
+                    Awaiting signatures {signing.signed}/{signing.total}
+                  </StatusPill>
                 )}
                 {s.job_number && (
                   <span className="truncate">
