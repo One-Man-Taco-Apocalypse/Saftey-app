@@ -3,11 +3,11 @@ import {
   ClipboardCheck,
   FileText,
   LayoutDashboard,
-  Settings,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { SettingsButton } from "@/components/settings-button";
 import { UserCard, UserCardSkeleton } from "@/components/user-card";
 
 // Sidebar buttons. Give an item an `href` to make it a link;
@@ -20,6 +20,9 @@ const items: { label: string; icon: React.ComponentType<{ className?: string }>;
   { label: "Team", icon: Users },
 ];
 
+const buttonClass =
+  "flex h-10 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
+
 function SidebarButton({
   label,
   icon: Icon,
@@ -29,8 +32,6 @@ function SidebarButton({
   icon: React.ComponentType<{ className?: string }>;
   href?: string;
 }) {
-  const className =
-    "flex h-10 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
   const content = (
     <>
       <Icon className="h-5 w-5 shrink-0" />
@@ -42,11 +43,11 @@ function SidebarButton({
   );
 
   return href ? (
-    <Link href={href} title={label} className={className}>
+    <Link href={href} title={label} className={buttonClass}>
       {content}
     </Link>
   ) : (
-    <button type="button" title={label} className={className}>
+    <button type="button" title={label} className={buttonClass}>
       {content}
     </button>
   );
@@ -75,7 +76,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <SidebarButton label="Settings" icon={Settings} />
+      <SettingsButton className={buttonClass} />
     </aside>
   );
 }
