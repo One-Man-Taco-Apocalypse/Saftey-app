@@ -1,9 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
 import type { Person } from "@/lib/person";
+import { getUserSettings } from "@/lib/settings";
+import { createClient } from "@/lib/supabase/server";
 
 // Everyone's public profile (name, color, position), sorted by name.
 // Used anywhere the app shows other people: crews, documents, etc.
-export async function getPeople(): Promise<Person[]> {
+// Loaded once per page however many cards need it.
+export const getPeople = cache(async (): Promise<Person[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
@@ -12,16 +15,9 @@ export async function getPeople(): Promise<Person[]> {
     .order("last_name", { nullsFirst: false });
   if (error) console.error("getPeople:", error.message);
   return ((data ?? []) as Omit<Person, "email">[]).map((p) => ({ ...p, email: null }));
-}
+});
 
 // The uids on the signed-in user's crew.
 export async function getCrewIds(userId: string): Promise<string[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("user_settings")
-    .select("crew_members")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (error) console.error("getCrewIds:", error.message);
-  return (data?.crew_members as string[] | null) ?? [];
+  return (await getUserSettings(userId)).crewMembers;
 }

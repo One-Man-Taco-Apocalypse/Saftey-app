@@ -1,150 +1,22 @@
 "use client";
 
-import {
-  CheckCircle2,
-  Clock,
-  Mail,
-  Pencil,
-  Search,
-  Send,
-  UserMinus,
-  UserPlus,
-  Users,
-} from "lucide-react";
-import Link from "next/link";
+import { Pencil, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@/components/avatar";
-import { LocalDate } from "@/components/local-date";
-import type { CrewDocument } from "@/lib/crew-documents";
-import { formatDocumentNumber } from "@/lib/documents";
+import type { CrewDocument } from "@/lib/crew-status";
 import { personName, type Person } from "@/lib/person";
 import { saveUserSettings } from "@/lib/save-settings";
-import { cn } from "@/lib/utils";
+import { lookup } from "@/lib/utils";
+import { ChangeCrewPanel } from "./crew/change-crew-panel";
+import { CrewMemberDocuments } from "./crew/crew-member-documents";
+import { PersonDetails } from "./crew/person-details";
 import { SignatureRequestsLiveRefresh } from "./live-refresh";
 import { Module, ModuleHeader, type ModuleSize } from "./module-grid";
 import { PopupButton } from "./popup";
 
-// One crew member's documents from the last 12 hours, grouped by document type,
-// each with THAT person's status: Complete, Waiting signature, or Requested (asked
-// to complete this type of document and not done yet).
-function CrewMemberDocuments({
-  documents,
-  templateNames,
-}: {
-  documents: CrewDocument[];
-  templateNames: Record<string, string>;
-}) {
-  if (documents.length === 0) {
-    return (
-      <p className="px-1 text-xs text-muted-foreground">
-        No documents in the last 12 hours, and nothing requested
-      </p>
-    );
-  }
-
-  const typeName = (d: CrewDocument) => templateNames[d.templateId] ?? "Document";
-  // Group by type (A-Z); newest first within a type
-  const sorted = [...documents].sort(
-    (a, b) =>
-      typeName(a).localeCompare(typeName(b)) ||
-      // within a type: requests first (still to do), then newest first
-      Number(b.status === "requested") - Number(a.status === "requested") ||
-      b.at.localeCompare(a.at),
-  );
-  const groups: { name: string; docs: CrewDocument[] }[] = [];
-  for (const d of sorted) {
-    const last = groups[groups.length - 1];
-    if (last?.name === typeName(d)) last.docs.push(d);
-    else groups.push({ name: typeName(d), docs: [d] });
-  }
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      {groups.map((group) => (
-        <div key={group.name}>
-          <p className="px-1 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
-            {group.name}
-          </p>
-          <ul className="mt-0.5 flex flex-col">
-            {group.docs.map((d) => (
-              <li key={d.key}>
-                <Link
-                  href={d.href}
-                  className="flex items-center gap-2 rounded-lg px-1 py-1 text-xs transition hover:bg-foreground/5"
-                >
-                  {d.status === "requested" ? (
-                    <span className="min-w-0 flex-1 truncate">
-                      Not started
-                      {d.fromNumber !== null && d.fromNumber !== undefined && (
-                        <span className="ml-1 text-muted-foreground">
-                          · asked on {formatDocumentNumber(d.fromNumber)}
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    <span className="min-w-0 flex-1 truncate">
-                      <span className="mr-1 tabular-nums text-muted-foreground">
-                        {formatDocumentNumber(d.documentNumber)}
-                      </span>
-                      {d.title || group.name}
-                      <span className="ml-1 text-muted-foreground">
-                        · <LocalDate iso={d.at} timeOnly />
-                      </span>
-                    </span>
-                  )}
-                  {d.status === "requested" ? (
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sky-500/15 px-2 py-0.5 font-medium text-sky-800 dark:text-sky-300">
-                      <Send className="h-3 w-3" />
-                      Requested
-                    </span>
-                  ) : d.status === "complete" ? (
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 font-medium text-emerald-700 dark:text-emerald-300">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Complete
-                    </span>
-                  ) : (
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-800 dark:text-amber-300">
-                      <Clock className="h-3 w-3" />
-                      Waiting signature
-                    </span>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// What shows inside a person's popup.
-function PersonDetails({ person }: { person: Person }) {
-  return (
-    <div>
-      <div className="flex items-center gap-4">
-        <Avatar color={person.color} className="h-16 w-16" />
-        <div className="min-w-0">
-          <p className="truncate text-lg font-semibold">{personName(person)}</p>
-          {person.position && (
-            <p className="text-sm text-muted-foreground">{person.position}</p>
-          )}
-        </div>
-      </div>
-
-      {person.email && (
-        <div className="mt-6 rounded-2xl border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/5">
-          <div className="flex items-center gap-3 p-3">
-            <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="truncate text-sm">{person.email}</span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
+// The interactive Crew card: who's on the crew, their recent documents, and
+// the "Change crew" popup. Data is loaded by crew-module.tsx on the server.
 export function CrewModuleClient({
   size = "medium",
   userId,
@@ -162,7 +34,6 @@ export function CrewModuleClient({
 }) {
   const router = useRouter();
   const [crewIds, setCrewIds] = useState<string[]>(initialCrew);
-  const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -183,117 +54,10 @@ export function CrewModuleClient({
   }
 
   // Keep the order people were added in
-  const crew = crewIds
-    .map((id) => people.find((p) => p.user_id === id))
-    .filter((p): p is Person => !!p);
-
-  const query = search.trim().toLowerCase();
-  const searchResults = people.filter((p) =>
-    `${personName(p)} ${p.email ?? ""} ${p.position ?? ""}`.toLowerCase().includes(query),
-  );
-
-  // What shows inside the Change Crew popup
-  const changeCrew = (
-    <div>
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search people"
-          className="h-10 w-full rounded-xl border border-white/70 bg-white/60 pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-sky-500 dark:border-white/15 dark:bg-white/10"
-        />
-      </div>
-
-      <div className="mt-3 max-h-80 overflow-y-auto rounded-2xl border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/5">
-        {searchResults.length === 0 ? (
-          <p className="p-4 text-center text-sm text-muted-foreground">
-            {people.length === 0 ? "No people found" : "No matches"}
-          </p>
-        ) : (
-          <div className="divide-y divide-foreground/10">
-            {searchResults.map((person) => {
-              const onCrew = crewIds.includes(person.user_id);
-              return (
-                <div
-                  key={person.user_id}
-                  className={cn(
-                    "flex items-center gap-3 py-2 pl-3 pr-2",
-                    onCrew && "bg-violet-500/10",
-                  )}
-                >
-                  <Avatar color={person.color} className="h-8 w-8" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">
-                      {personName(person)}
-                      {person.user_id === userId && (
-                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                          (You)
-                        </span>
-                      )}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {person.position ?? person.email}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => toggleMember(person.user_id)}
-                    disabled={saving}
-                    aria-label={onCrew ? "Remove from crew" : "Add to crew"}
-                    className={cn(
-                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-60",
-                      onCrew
-                        ? "text-red-500 hover:bg-red-500/10"
-                        : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
-                    )}
-                  >
-                    {onCrew ? (
-                      <UserMinus className="h-5 w-5" />
-                    ) : (
-                      <UserPlus className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {saveError && (
-        <p className="mt-3 rounded-xl bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-400">
-          {saveError}
-        </p>
-      )}
-    </div>
-  );
+  const personById = lookup(people, (p) => p.user_id);
+  const crew = crewIds.map((id) => personById.get(id)).filter((p): p is Person => !!p);
 
   return (
-<<<<<<< Updated upstream
-    <Module size="medium">
-      <div className="flex items-center gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-500/15 text-violet-600 dark:text-violet-400">
-          <Users className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-muted-foreground">Crew</p>
-          <p className="mt-0.5 text-2xl font-semibold tracking-tight">
-            {crew.length} {crew.length === 1 ? "person" : "people"}
-          </p>
-        </div>
-
-        <PopupButton
-          title="Change Crew"
-          popup={changeCrew}
-          className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/70 bg-white/60 px-3 py-1.5 text-sm font-medium hover:bg-white/90 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-          Change crew
-        </PopupButton>
-      </div>
-=======
     <Module size={size} id="crew" className="scroll-mt-20">
       <ModuleHeader
         title="My crew"
@@ -320,7 +84,6 @@ export function CrewModuleClient({
           </PopupButton>
         }
       />
->>>>>>> Stashed changes
 
       {/* Live: updates as soon as a crew member signs, is asked to, or submits a
           document; every 5 minutes it also re-checks the 12-hour window */}
@@ -352,9 +115,7 @@ export function CrewModuleClient({
               >
                 <Avatar color={person.color} className="h-8 w-8" />
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium">
-                    {personName(person)}
-                  </span>
+                  <span className="block truncate text-sm font-medium">{personName(person)}</span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {person.position ?? person.email}
                   </span>

@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-import { ChevronRight, Clock, FilePlus2, FileText } from "lucide-react";
-=======
 import { ChevronRight, FilePlus2, FileText, X } from "lucide-react";
->>>>>>> Stashed changes
 import Link from "next/link";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
@@ -10,20 +6,13 @@ import { Panel } from "@/components/dashboard/panel";
 import { ClearAllDocuments } from "@/components/documents/clear-all-documents";
 import { primaryButtonClass } from "@/components/documents/styles";
 import { LocalDate } from "@/components/local-date";
-<<<<<<< Updated upstream
-import { formatDocumentNumber } from "@/lib/documents";
-=======
 import { PageHeader } from "@/components/page-header";
 import { StatusPill } from "@/components/status-pill";
 import { documentTitle, formatDocumentNumber } from "@/lib/documents";
->>>>>>> Stashed changes
 import { personName } from "@/lib/person";
 import { getPeople } from "@/lib/people";
 import { getProjects } from "@/lib/projects";
 import { getSignatureProgress, isAwaitingSignatures } from "@/lib/signatures";
-<<<<<<< Updated upstream
-import { getAllTemplates, getSubmissions, lookup } from "@/lib/submissions";
-=======
 import { getSubmissions } from "@/lib/submissions";
 import { getAllTemplates } from "@/lib/templates";
 import { cn, lookup } from "@/lib/utils";
@@ -37,7 +26,6 @@ const columns =
 async function SubmissionList({ searchParams }: { searchParams: SearchParams }) {
   const { q } = await searchParams;
   const query = (Array.isArray(q) ? q[0] : q)?.trim() ?? "";
->>>>>>> Stashed changes
 
   const [submissions, templates, projects, people] = await Promise.all([
     getSubmissions(),
@@ -73,17 +61,6 @@ async function SubmissionList({ searchParams }: { searchParams: SearchParams }) 
   const progress = await getSignatureProgress(shown.map((r) => r.s.id));
 
   return (
-<<<<<<< Updated upstream
-    <div className="divide-y divide-foreground/10 overflow-hidden rounded-2xl border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/5">
-      {submissions.map((s) => {
-        const template = templateById.get(s.template_id);
-        const project = s.job_number ? projectByJob.get(s.job_number) : undefined;
-        const person = s.submitted_by ? personById.get(s.submitted_by) : undefined;
-        const title =
-          typeof s.answers.title === "string" && s.answers.title
-            ? s.answers.title
-            : template?.name ?? "Document";
-=======
     <>
       {query && (
         <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
@@ -102,7 +79,6 @@ async function SubmissionList({ searchParams }: { searchParams: SearchParams }) 
           </span>
         </div>
       )}
->>>>>>> Stashed changes
 
       {shown.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
@@ -126,36 +102,6 @@ async function SubmissionList({ searchParams }: { searchParams: SearchParams }) 
             <span />
           </div>
 
-<<<<<<< Updated upstream
-            <span className="min-w-0 flex-1">
-              <span className="block truncate font-medium">
-                <span className="mr-1.5 tabular-nums text-muted-foreground">
-                  {formatDocumentNumber(s.document_number)}
-                </span>
-                {title}
-              </span>
-              <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-                <span className="rounded-full bg-sky-500/10 px-2 py-0.5 font-medium text-sky-700 dark:text-sky-300">
-                  {template?.name ?? "Unknown template"}
-                </span>
-                {isAwaitingSignatures(progress.get(s.id)) && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-800 dark:text-amber-300">
-                    <Clock className="h-3 w-3" />
-                    Awaiting signatures {progress.get(s.id)!.signed}/{progress.get(s.id)!.total}
-                  </span>
-                )}
-                {s.job_number && (
-                  <span className="truncate">
-                    {project?.job_name ?? s.job_number} · {s.job_number}
-                  </span>
-                )}
-                {/* On phones the right-hand column is hidden, so show the time here */}
-                <span className="sm:hidden">
-                  <LocalDate iso={s.submitted_at} withTime />
-                </span>
-              </span>
-            </span>
-=======
           <ul className="divide-y divide-border">
             {shown.map(({ s, template, project, person, title }) => {
               const signing = progress.get(s.id);
@@ -172,7 +118,6 @@ async function SubmissionList({ searchParams }: { searchParams: SearchParams }) 
                     <span className="hidden font-medium tabular-nums text-muted-foreground md:block">
                       {formatDocumentNumber(s.document_number)}
                     </span>
->>>>>>> Stashed changes
 
                     {/* Document: title + type. On phones this also carries the rest. */}
                     <span className="flex min-w-0 flex-1 items-center gap-3">

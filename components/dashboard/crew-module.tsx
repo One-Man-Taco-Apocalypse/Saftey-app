@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCrewDocuments } from "@/lib/crew-documents";
 import { getCrewIds, getPeople } from "@/lib/people";
-import { getAllTemplates } from "@/lib/submissions";
+import { getTemplateNames } from "@/lib/templates";
 import { getCurrentUser } from "@/lib/user";
 import { Module, type ModuleSize } from "./module-grid";
 import { CrewModuleClient } from "./crew-module-client";
@@ -12,13 +12,13 @@ export async function CrewModule({ size = "medium" }: { size?: ModuleSize } = {}
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
-  const [people, crewIds, templates] = await Promise.all([
+  const crewIds = await getCrewIds(user.id);
+  // The crew's documents load alongside everything else, not after it
+  const [people, templateNames, crewDocuments] = await Promise.all([
     getPeople(),
-    getCrewIds(user.id),
-    getAllTemplates(),
+    getTemplateNames(),
+    getCrewDocuments(crewIds),
   ]);
-  const crewDocuments = await getCrewDocuments(crewIds);
-  const templateNames = Object.fromEntries(templates.map((t) => [t.id, t.name]));
 
   return (
     <CrewModuleClient

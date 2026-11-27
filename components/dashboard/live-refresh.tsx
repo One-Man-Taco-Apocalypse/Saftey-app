@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { randomId } from "@/lib/uuid";
 
@@ -12,6 +12,11 @@ import { randomId } from "@/lib/uuid";
 // Tables must be in the supabase_realtime publication (see migrations).
 // `refreshEveryMinutes` also re-loads on a timer, for time windows like
 // "last 12 hours" that change without any database event.
+//
+// One save can change many rows at once (a document with 10 signers inserts 10
+// signature rows), so changes arriving close together cause ONE reload.
+const BATCH_MS = 400;
+
 export function SignatureRequestsLiveRefresh({
   userIds,
   channelName,
@@ -28,6 +33,19 @@ export function SignatureRequestsLiveRefresh({
   const router = useRouter();
   const key = [...userIds].sort().join(","); // stable dependency
 
+  // Reload once, shortly after the last change in a burst
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshSoon = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => router.refresh(), BATCH_MS);
+  }, [router]);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!key) return;
     const ids = key.split(",");
@@ -42,18 +60,6 @@ export function SignatureRequestsLiveRefresh({
       await supabase.realtime.setAuth(); // send the user's login so security rules apply
       if (cancelled) return;
       // Fresh name each time, so a quick remount never reuses a channel that's closing
-<<<<<<< Updated upstream
-      channel = supabase.channel(`${channelName}-${crypto.randomUUID()}`).on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "document_signatures", filter: filterFor("user_id") },
-        () => router.refresh(),
-      );
-      if (includeSubmissions) {
-        channel = channel.on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "document_submissions", filter: filterFor("submitted_by") },
-          () => router.refresh(),
-=======
       channel = supabase
         .channel(`${channelName}-${randomId()}`)
         .on(
@@ -71,16 +77,11 @@ export function SignatureRequestsLiveRefresh({
             filter: filterFor("submitted_by"),
           },
           () => refreshSoon(),
->>>>>>> Stashed changes
         );
       }
       if (includeRequests) {
         channel = channel.on(
           "postgres_changes",
-<<<<<<< Updated upstream
-          { event: "*", schema: "public", table: "document_requests", filter: filterFor("requested_user_id") },
-          () => router.refresh(),
-=======
           {
             event: "*",
             schema: "public",
@@ -88,7 +89,6 @@ export function SignatureRequestsLiveRefresh({
             filter: filterFor("requested_user_id"),
           },
           () => refreshSoon(),
->>>>>>> Stashed changes
         );
       }
       channel.subscribe();
@@ -98,12 +98,28 @@ export function SignatureRequestsLiveRefresh({
       cancelled = true;
       if (channel) supabase.removeChannel(channel);
     };
-  }, [key, channelName, includeSubmissions, includeRequests, router]);
+  }, [key, channelName, includeSubmissions, includeRequests, refreshSoon]);
 
   useEffect(() => {
     if (!refreshEveryMinutes) return;
-    const timer = setInterval(() => router.refresh(), refreshEveryMinutes * 60 * 1000);
-    return () => clearInterval(timer);
+    // Skipped while the tab is hidden; catches up as soon as it's shown again
+    let stale = false;
+    const tick = () => {
+      if (document.hidden) stale = true;
+      else router.refresh();
+    };
+    const onVisible = () => {
+      if (!document.hidden && stale) {
+        stale = false;
+        router.refresh();
+      }
+    };
+    const interval = setInterval(tick, refreshEveryMinutes * 60 * 1000);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [refreshEveryMinutes, router]);
 
   return null;
