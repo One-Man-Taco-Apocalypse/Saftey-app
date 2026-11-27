@@ -169,6 +169,7 @@ const FULL_WIDTH_TYPES = new Set<FieldType>([
   "signatures",
   "yes_no_na",
   "checkbox",
+  "toolbox_talk",
 ]);
 
 // Which fields take the full row on a two-column layout. Short fields sit side

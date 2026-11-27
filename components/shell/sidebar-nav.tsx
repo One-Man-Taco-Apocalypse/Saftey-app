@@ -7,6 +7,7 @@ import {
   FileText,
   FolderCog,
   LayoutDashboard,
+  MessagesSquare,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -31,7 +32,10 @@ const sections: { title: string; items: NavItem[] }[] = [
   },
   {
     title: "Admin",
-    items: [{ label: "Edit projects", icon: FolderCog, href: "/dashboard/admin/projects" }],
+    items: [
+      { label: "Edit projects", icon: FolderCog, href: "/dashboard/admin/projects" },
+      { label: "Toolbox talks", icon: MessagesSquare, href: "/dashboard/admin/toolbox-talks" },
+    ],
   },
   {
     title: "Coming soon",

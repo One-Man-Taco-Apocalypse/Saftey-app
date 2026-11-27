@@ -1,4 +1,4 @@
-import { FilePlus2, FlaskConical, HardHat, LayoutGrid, Scale } from "lucide-react";
+import { FilePlus2, FlaskConical, HardHat, LayoutGrid, MessagesSquare, Scale } from "lucide-react";
 import Link from "next/link";
 import { Module, ModuleHeader } from "./module-grid";
 
@@ -11,6 +11,12 @@ const apps = [
     href: "/dashboard/documents/new",
     icon: FilePlus2,
     gradient: "from-sky-400 to-blue-600",
+  },
+  {
+    title: "Toolbox Talks",
+    href: "/dashboard/toolbox-talks",
+    icon: MessagesSquare,
+    gradient: "from-violet-500 to-indigo-700",
   },
   {
     title: "OSHA Online Regs",

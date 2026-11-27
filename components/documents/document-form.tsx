@@ -13,6 +13,7 @@ import {
 } from "@/lib/forms";
 import type { Person } from "@/lib/person";
 import type { Project } from "@/lib/projects";
+import type { TalkOption } from "@/lib/toolbox-talks";
 import { cn } from "@/lib/utils";
 import { submitDocument, type SubmitResult } from "@/lib/submit-document";
 import { FieldInput, type FieldContext } from "./form/field-input";
@@ -34,6 +35,8 @@ export function DocumentForm({
   people,
   currentUserId,
   crewIds,
+  talks = [],
+  prefill = {},
 }: {
   template: DocumentTemplate;
   version: DocumentTemplateVersion;
@@ -42,12 +45,15 @@ export function DocumentForm({
   people: Person[];
   currentUserId: string;
   crewIds: string[]; // the signed-in user's crew, for "Quick add" on signature tables
+  talks?: TalkOption[]; // toolbox talk library, for "toolbox_talk" fields
+  prefill?: Answers; // starting answers, e.g. the talk picked on its page
 }) {
   const fields = version.fields;
 
-  const [answers, setAnswers] = useState<Answers>(() =>
-    initialAnswers(fields, { currentJob, currentUserId }),
-  );
+  const [answers, setAnswers] = useState<Answers>(() => ({
+    ...initialAnswers(fields, { currentJob, currentUserId }),
+    ...prefill,
+  }));
   // Date/time fields start at "now": set after loading, so server and browser match
   useEffect(() => {
     setAnswers((prev) => withDatetimeDefaults(fields, prev, toLocalInputValue()));
@@ -76,8 +82,9 @@ export function DocumentForm({
       currentUserId,
       crewIds,
       firstSignerLabel: fields.find((f) => f.type === "completed_by")?.label,
+      talks,
     }),
-    [projects, people, currentUserId, crewIds, fields],
+    [projects, people, currentUserId, crewIds, fields, talks],
   );
 
   const clearError = (id: string) =>

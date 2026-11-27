@@ -677,5 +677,45 @@ console.log("\nProject workforce (25)");
   ok("logged-out (anon) can't call it", !!anon.error);
 }
 
+// ---- 26: toolbox talks ---------------------------------------------------------
+console.log("\nToolbox talks (26)");
+{
+  try {
+    await admin(read("20261127000026_toolbox_talks.sql"));
+    await admin(read("20261127000026_toolbox_talks.sql"));
+    ok("migration 26 runs, and re-runs", true);
+  } catch (e) { ok("migration 26 runs, and re-runs", false, e.message); }
+
+  await admin(`insert into storage.objects (bucket_id, name, owner) values ('toolbox-talks', 'talks/ladders.pdf', '${A}')`);
+  const add = await as(A, `insert into public.toolbox_talks (title, category, pdf_path) values ('Ladder safety', 'Ladders', 'talks/ladders.pdf') returning id, created_by`);
+  ok("a signed-in user can add a talk (stamped as theirs)", !add.error && add.rows[0].created_by === A, JSON.stringify(add));
+  const talkId = add.rows?.[0]?.id;
+
+  const forged = await as(A, `insert into public.toolbox_talks (title, category, created_by) values ('X', 'Y', '${B}')`);
+  ok("...but not as someone else", !!forged.error);
+  const blank = await as(A, `insert into public.toolbox_talks (title, category) values ('  ', 'Ladders')`);
+  ok("a blank title is refused", !!blank.error);
+
+  const readAll = await as(B, `select title from public.toolbox_talks`);
+  ok("everyone signed in can read the library", !readAll.error && readAll.rows.some((r) => r.title === "Ladder safety"));
+  const anon = await asAnon(`select * from public.toolbox_talks`);
+  ok("logged-out (anon) can't read it", !!anon.error);
+
+  const archive = await as(B, `update public.toolbox_talks set archived = true where id = '${talkId}' returning archived`);
+  ok("talks can be archived", !archive.error && archive.rows[0]?.archived === true, JSON.stringify(archive));
+  const del = await as(A, `delete from public.toolbox_talks where id = '${talkId}'`);
+  ok("talks can't be deleted (archive instead)", !!del.error, JSON.stringify(del));
+
+  const usedPdf = await as(A, `delete from storage.objects where name = 'talks/ladders.pdf' returning name`);
+  ok("a PDF a talk uses can't be deleted", !usedPdf.error && usedPdf.rows.length === 0, JSON.stringify(usedPdf));
+  await admin(`insert into storage.objects (bucket_id, name, owner) values ('toolbox-talks', 'talks/failed-upload.pdf', '${A}')`);
+  const unused = await as(A, `delete from storage.objects where name = 'talks/failed-upload.pdf' returning name`);
+  ok("an unused PDF (failed upload) can be cleaned up by its uploader", !unused.error && unused.rows.length === 1, JSON.stringify(unused));
+
+  const tpl = (await db.query(`select fields from public.document_template_versions where template_id = '00000000-0000-0000-0000-00000000d0c5'`)).rows[0];
+  ok("the Toolbox Talk form exists, with a talk picker and attendee signatures",
+    !!tpl && tpl.fields.some((f) => f.type === "toolbox_talk") && tpl.fields.some((f) => f.type === "signatures"));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

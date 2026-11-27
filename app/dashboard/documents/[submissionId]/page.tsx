@@ -14,6 +14,7 @@ import { getProjects } from "@/lib/projects";
 import { getRequestsFrom, getSignatures, isOutstanding } from "@/lib/signatures";
 import { getFileUrls, getSubmission } from "@/lib/submissions";
 import { getTemplate, getTemplateVersion } from "@/lib/templates";
+import { getToolboxTalks, toTalkOption } from "@/lib/toolbox-talks";
 import { getCurrentUser } from "@/lib/user";
 import { cn, lookup } from "@/lib/utils";
 import { PageContainer } from "@/components/page-container";
@@ -42,6 +43,8 @@ async function CompletedDocument({ params }: { params: Promise<{ submissionId: s
     getCurrentUser(),
   ]);
   const answers = submission.answers;
+  const hasTalk = version?.fields.some((f) => f.type === "toolbox_talk") ?? false;
+  const talks = hasTalk ? await getToolboxTalks(true) : [];
 
   const signaturesByField = new Map<string, DocumentSignature[]>();
   for (const s of signatures) {
@@ -79,6 +82,7 @@ async function CompletedDocument({ params }: { params: Promise<{ submissionId: s
     personById,
     signaturesFor,
     documentRequests,
+    talkById: new Map(talks.map((t) => [t.id, toTalkOption(t)])),
   };
 
   return (

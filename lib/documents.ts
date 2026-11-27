@@ -15,7 +15,8 @@ export type FieldType =
   | "person" // pick anyone (starts empty); saved as their uid
   | "datetime" // date + time, starts at "now"; saved as an ISO timestamp (UTC)
   | "yes_no_na" // Yes / No / N/A buttons; saved as "yes" | "no" | "na"
-  | "section"; // a heading that groups the fields after it; saves nothing
+  | "section" // a heading that groups the fields after it; saves nothing
+  | "toolbox_talk"; // pick a talk from the toolbox talk library; saved as its id
 
 // Answers for "yes_no_na" fields
 export const YES_NO_NA = [

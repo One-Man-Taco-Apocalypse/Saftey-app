@@ -6,10 +6,16 @@ import { DocumentForm } from "@/components/documents/document-form";
 import { getCrewIds, getPeople } from "@/lib/people";
 import { getProjects, getProjectSettings } from "@/lib/projects";
 import { getLatestVersion, getTemplate } from "@/lib/templates";
+import { getToolboxTalks, toTalkOption } from "@/lib/toolbox-talks";
 import { getCurrentUser } from "@/lib/user";
 import { PageContainer } from "@/components/page-container";
 
-async function FillDocument({ params }: { params: Promise<{ templateId: string }> }) {
+type Props = {
+  params: Promise<{ templateId: string }>;
+  searchParams: Promise<{ talk?: string | string[] }>; // ?talk=<id>: start with that toolbox talk
+};
+
+async function FillDocument({ params, searchParams }: Props) {
   const { templateId } = await params;
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
@@ -24,6 +30,13 @@ async function FillDocument({ params }: { params: Promise<{ templateId: string }
   ]);
   if (!template || !version) notFound();
 
+  // Toolbox talk forms: the talk library, and the talk picked on its page (if any)
+  const talkField = version.fields.find((f) => f.type === "toolbox_talk");
+  const talks = talkField ? (await getToolboxTalks()).map(toTalkOption) : [];
+  const { talk } = await searchParams;
+  const pickedTalk = typeof talk === "string" && talks.some((t) => t.id === talk) ? talk : null;
+  const prefill = talkField && pickedTalk ? { [talkField.id]: pickedTalk } : {};
+
   return (
     <>
       <h1 className="text-2xl font-semibold tracking-tight">{template.name}</h1>
@@ -37,6 +50,8 @@ async function FillDocument({ params }: { params: Promise<{ templateId: string }
           people={people}
           currentUserId={user.id}
           crewIds={crewIds}
+          talks={talks}
+          prefill={prefill}
         />
       </div>
     </>
@@ -59,7 +74,7 @@ function FormSkeleton() {
   );
 }
 
-export default function FillDocumentPage({ params }: { params: Promise<{ templateId: string }> }) {
+export default function FillDocumentPage({ params, searchParams }: Props) {
   return (
     <PageContainer width="form">
       <Breadcrumbs
@@ -72,7 +87,7 @@ export default function FillDocumentPage({ params }: { params: Promise<{ templat
       />
       <Panel>
         <Suspense fallback={<FormSkeleton />}>
-          <FillDocument params={params} />
+          <FillDocument params={params} searchParams={searchParams} />
         </Suspense>
       </Panel>
     </PageContainer>

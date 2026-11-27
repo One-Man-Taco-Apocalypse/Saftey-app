@@ -1,4 +1,4 @@
-import { Check, FolderKanban, Minus } from "lucide-react";
+import { Check, FolderKanban, MessagesSquare, Minus } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { LocalDate } from "@/components/local-date";
@@ -12,6 +12,7 @@ import {
 } from "@/lib/documents";
 import { isStringList } from "@/lib/forms";
 import { personName, type Person } from "@/lib/person";
+import type { TalkOption } from "@/lib/toolbox-talks";
 import { cn } from "@/lib/utils";
 import { SignRequest } from "../sign-request";
 
@@ -26,6 +27,7 @@ export type AnswerContext = {
   personById: Map<string, Person>;
   signaturesFor: (fieldId: string) => DocumentSignature[]; // rows from document_signatures
   documentRequests: DocumentRequest[]; // documents this one asked people to complete
+  talkById: Map<string, TalkOption>; // toolbox talks, for "toolbox_talk" answers
 };
 
 export function PersonLine({ person, fallback }: { person?: Person; fallback?: string }) {
@@ -33,7 +35,7 @@ export function PersonLine({ person, fallback }: { person?: Person; fallback?: s
     <div className="flex items-center gap-3">
       <Avatar color={person?.color ?? "#6b7280"} className="h-8 w-8" />
       <div className="min-w-0">
-        <p className="truncate font-medium">{person ? personName(person) : fallback ?? "Unknown"}</p>
+        <p className="truncate font-medium">{person ? personName(person) : (fallback ?? "Unknown")}</p>
         {person?.position && <p className="text-xs text-muted-foreground">{person.position}</p>}
       </div>
     </div>
@@ -62,6 +64,28 @@ export function AnswerView({
   ctx: AnswerContext;
 }) {
   switch (field.type) {
+    case "toolbox_talk": {
+      const talk = typeof value === "string" ? ctx.talkById.get(value) : undefined;
+      if (!talk) return typeof value === "string" && value ? <span>Talk no longer available</span> : empty;
+      return (
+        <Link
+          href={`/dashboard/toolbox-talks/${talk.id}`}
+          className="group flex w-fit items-center gap-3 rounded-xl border border-border p-2.5 pr-4 transition hover:bg-muted"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-sky-600 dark:text-sky-400">
+            <MessagesSquare className="h-4 w-4" />
+          </span>
+          <span className="min-w-0">
+            <span className="block font-medium group-hover:underline">
+              {talk.code ? `${talk.code} · ` : ""}
+              {talk.title}
+            </span>
+            <span className="block text-xs text-muted-foreground">{talk.category}</span>
+          </span>
+        </Link>
+      );
+    }
+
     case "job":
       return ctx.jobLabel ? (
         <div className="flex items-center gap-3">
@@ -131,7 +155,12 @@ export function AnswerView({
       const option = YES_NO_NA.find((o) => o.value === value);
       if (!option) return empty;
       return (
-        <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold", yesNoTone[option.value])}>
+        <span
+          className={cn(
+            "inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold",
+            yesNoTone[option.value],
+          )}
+        >
           {option.label}
         </span>
       );

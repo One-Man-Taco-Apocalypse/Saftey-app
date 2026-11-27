@@ -24,6 +24,7 @@ const ALL_TYPES: FieldType[] = [
   "datetime",
   "yes_no_na",
   "section",
+  "toolbox_talk",
 ];
 
 const fields: TemplateField[] = ALL_TYPES.map((type) => ({
@@ -61,6 +62,8 @@ describe("DocumentForm", () => {
         people={[me]}
         currentUserId={me.user_id}
         crewIds={[]}
+        talks={[{ id: "talk-1", title: "Ladder safety", category: "Ladders", code: "LD-01" }]}
+        prefill={{ f_toolbox_talk: "talk-1" }}
       />,
     );
     expect(html).not.toContain("Unknown field type");
@@ -84,6 +87,7 @@ describe("AnswerView", () => {
     f_person: me.user_id,
     f_datetime: "2026-11-26T14:00:00.000Z",
     f_yes_no_na: "na",
+    f_toolbox_talk: "talk-1",
   };
   const ctx: AnswerContext = {
     submissionId: "s",
@@ -93,6 +97,9 @@ describe("AnswerView", () => {
     personById: new Map([[me.user_id, me]]),
     signaturesFor: () => [],
     documentRequests: [],
+    talkById: new Map([
+      ["talk-1", { id: "talk-1", title: "Ladder safety", category: "Ladders", code: "LD-01" }],
+    ]),
   };
 
   it("draws every field type's answer", () => {
@@ -107,6 +114,7 @@ describe("AnswerView", () => {
     expect(html).toContain("Tower");
     expect(html).toContain("Pat Lee");
     expect(html).toContain("N/A");
+    expect(html).toContain("Ladder safety");
     expect(html).toContain("https://example.test/1.png");
   });
 });

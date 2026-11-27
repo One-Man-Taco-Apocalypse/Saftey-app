@@ -1,9 +1,12 @@
 "use client";
 
+import { ExternalLink, MessagesSquare } from "lucide-react";
+import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import type { AnswerValue, TemplateField } from "@/lib/documents";
 import type { Person } from "@/lib/person";
 import type { Project } from "@/lib/projects";
+import type { TalkOption } from "@/lib/toolbox-talks";
 import { cn } from "@/lib/utils";
 import { JobPicker } from "../job-picker";
 import { PhotoUpload, type PhotoItem } from "../photo-upload";
@@ -22,7 +25,59 @@ export type FieldContext = {
   currentUserId: string;
   crewIds: string[];
   firstSignerLabel?: string; // label of the "Completed by" field
+  talks: TalkOption[]; // the toolbox talk library, for "toolbox_talk" fields
 };
+
+// Pick a toolbox talk; once picked, shows it with a link to read it again
+function TalkSelect({
+  id,
+  value,
+  onChange,
+  invalid,
+  talks,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  invalid: boolean;
+  talks: TalkOption[];
+}) {
+  const chosen = talks.find((t) => t.id === value);
+  return (
+    <div className="flex flex-col gap-2">
+      <SearchSelect
+        id={id}
+        value={value}
+        onChange={onChange}
+        invalid={invalid}
+        placeholder="Choose a toolbox talk…"
+        searchPlaceholder="Search talks"
+        options={talks.map((t) => ({
+          value: t.id,
+          label: t.code ? `${t.code} · ${t.title}` : t.title,
+          description: t.category,
+        }))}
+      />
+      {chosen && (
+        <Link
+          href={`/dashboard/toolbox-talks/${chosen.id}`}
+          target="_blank"
+          className="inline-flex w-fit items-center gap-1.5 rounded-lg bg-sky-500/10 px-2.5 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-500/15 dark:text-sky-300"
+        >
+          <MessagesSquare className="h-3.5 w-3.5" />
+          Read this talk
+          <ExternalLink className="h-3 w-3" />
+          <span className="sr-only">(opens in a new tab)</span>
+        </Link>
+      )}
+      {talks.length === 0 && (
+        <p className="text-xs text-muted-foreground">
+          No toolbox talks yet. Add some on Admin › Toolbox talks.
+        </p>
+      )}
+    </div>
+  );
+}
 
 // Pick a person, with their colour dot beside the dropdown
 function PersonSelect({
@@ -84,6 +139,11 @@ export function FieldInput({
   const text = typeof value === "string" || typeof value === "number" ? String(value) : "";
 
   switch (field.type) {
+    case "toolbox_talk":
+      return (
+        <TalkSelect id={field.id} value={text} onChange={onChange} invalid={invalid} talks={ctx.talks} />
+      );
+
     case "job":
       return (
         <JobPicker id={field.id} projects={ctx.projects} value={text} onChange={onChange} invalid={invalid} />
