@@ -5,6 +5,7 @@ export type UserSettings = {
   currentProject: string | null;
   favoriteProjects: string[];
   crewMembers: string[];
+  preferences: Record<string, unknown>; // free-form per-user settings, e.g. { dashboard: {...} }
 };
 
 // The signed-in user's user_settings row, loaded once per page however many
@@ -13,7 +14,7 @@ export const getUserSettings = cache(async (userId: string): Promise<UserSetting
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_settings")
-    .select("current_project, favorite_projects, crew_members")
+    .select("current_project, favorite_projects, crew_members, preferences")
     .eq("user_id", userId)
     .maybeSingle();
   if (error) console.error("getUserSettings:", error.message);
@@ -21,5 +22,6 @@ export const getUserSettings = cache(async (userId: string): Promise<UserSetting
     currentProject: (data?.current_project as string | null) ?? null,
     favoriteProjects: (data?.favorite_projects as string[] | null) ?? [],
     crewMembers: (data?.crew_members as string[] | null) ?? [],
+    preferences: (data?.preferences as Record<string, unknown> | null) ?? {},
   };
 });

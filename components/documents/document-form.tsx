@@ -7,11 +7,13 @@ import {
   initialAnswers,
   toLocalInputValue,
   validateForm,
+  fullWidthFieldIds,
   visibleFields as getVisibleFields,
   withDatetimeDefaults,
 } from "@/lib/forms";
 import type { Person } from "@/lib/person";
 import type { Project } from "@/lib/projects";
+import { cn } from "@/lib/utils";
 import { submitDocument, type SubmitResult } from "@/lib/submit-document";
 import { FieldInput, type FieldContext } from "./form/field-input";
 import { FieldRow } from "./form/field-row";
@@ -106,6 +108,7 @@ export function DocumentForm({
   }
 
   const visibleFields = getVisibleFields(fields, answers);
+  const fullWidth = fullWidthFieldIds(visibleFields);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -141,43 +144,46 @@ export function DocumentForm({
   if (submitted) return <SubmittedScreen templateName={template.name} result={submitted} />;
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+    // Two columns on wide screens: short fields side by side, long ones full width
+    <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-x-6">
       {visibleFields.map((field) => (
-        <FieldRow key={field.id} field={field} error={errors[field.id]}>
-          <FieldInput
-            field={field}
-            value={answers[field.id]}
-            onChange={(v) =>
-              field.type === "completed_by"
-                ? setCompletedBy(field.id, String(v ?? ""))
-                : setAnswer(field.id, v)
-            }
-            invalid={!!errors[field.id]}
-            ctx={ctx}
-            photos={photos[field.id] ?? []}
-            onPhotosChange={(p) => {
-              setPhotos((prev) => ({ ...prev, [field.id]: p }));
-              clearError(field.id);
-            }}
-            onSignatureChange={(png) => {
-              setSignature((prev) => ({ ...prev, [field.id]: png }));
-              clearError(field.id);
-            }}
-            signatureRows={signatureRows[field.id] ?? []}
-            onSignatureRowsChange={(rows) => {
-              setSignatureRows((prev) => ({ ...prev, [field.id]: rows }));
-              clearError(field.id);
-            }}
-          />
-        </FieldRow>
+        <div key={field.id} className={cn("min-w-0", fullWidth.has(field.id) && "lg:col-span-2")}>
+          <FieldRow field={field} error={errors[field.id]}>
+            <FieldInput
+              field={field}
+              value={answers[field.id]}
+              onChange={(v) =>
+                field.type === "completed_by"
+                  ? setCompletedBy(field.id, String(v ?? ""))
+                  : setAnswer(field.id, v)
+              }
+              invalid={!!errors[field.id]}
+              ctx={ctx}
+              photos={photos[field.id] ?? []}
+              onPhotosChange={(p) => {
+                setPhotos((prev) => ({ ...prev, [field.id]: p }));
+                clearError(field.id);
+              }}
+              onSignatureChange={(png) => {
+                setSignature((prev) => ({ ...prev, [field.id]: png }));
+                clearError(field.id);
+              }}
+              signatureRows={signatureRows[field.id] ?? []}
+              onSignatureRowsChange={(rows) => {
+                setSignatureRows((prev) => ({ ...prev, [field.id]: rows }));
+                clearError(field.id);
+              }}
+            />
+          </FieldRow>
+        </div>
       ))}
 
-      {submitError && <p className={errorBoxClass}>{submitError}</p>}
+      {submitError && <p className={cn(errorBoxClass, "lg:col-span-2")}>{submitError}</p>}
 
       <button
         type="submit"
         disabled={submitting}
-        className="mt-2 flex h-11 items-center justify-center gap-2 rounded-lg bg-sky-600 font-medium text-white shadow-lg shadow-sky-600/20 transition hover:bg-sky-700 active:scale-[0.99] disabled:opacity-70"
+        className="mt-2 flex h-11 items-center justify-center gap-2 rounded-lg bg-sky-600 lg:col-span-2 font-medium text-white shadow-lg shadow-sky-600/20 transition hover:bg-sky-700 active:scale-[0.99] disabled:opacity-70"
       >
         {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
         {submitting ? "Submitting…" : "Submit"}

@@ -7,6 +7,7 @@ import { primaryButtonClass, secondaryButtonClass } from "@/components/documents
 import { PageHeader } from "@/components/page-header";
 import { getCurrentUser } from "@/lib/user";
 import { cn } from "@/lib/utils";
+import { PageContainer } from "@/components/page-container";
 
 async function Greeting() {
   const user = await getCurrentUser();
@@ -17,7 +18,7 @@ async function Greeting() {
 // the greeting, the main buttons and the tab bar. "(home)" doesn't appear in the URL.
 export default function DashboardHomeLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto w-full max-w-7xl p-4 md:p-8">
+    <PageContainer>
       <PageHeader
         title={
           <Suspense fallback={<span className="invisible">Good morning</span>}>
@@ -43,6 +44,6 @@ export default function DashboardHomeLayout({ children }: { children: React.Reac
       />
       <DashboardTabs />
       {children}
-    </div>
+    </PageContainer>
   );
 }

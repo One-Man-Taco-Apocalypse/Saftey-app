@@ -1,4 +1,4 @@
-import { FilePlus2, LayoutGrid, Scale } from "lucide-react";
+import { FilePlus2, FlaskConical, HardHat, LayoutGrid, Scale } from "lucide-react";
 import Link from "next/link";
 import { Module, ModuleHeader } from "./module-grid";
 
@@ -17,6 +17,18 @@ const apps = [
     href: "https://www.ontario.ca/laws/statute/90o01#BK0",
     icon: Scale,
     gradient: "from-red-500 to-rose-700",
+  },
+  {
+    title: "Construction Regs (213/91)",
+    href: "https://www.ontario.ca/laws/regulation/910213#BK0",
+    icon: HardHat,
+    gradient: "from-amber-400 to-orange-600",
+  },
+  {
+    title: "WHMIS Regs (860)",
+    href: "https://www.ontario.ca/laws/regulation/900860",
+    icon: FlaskConical,
+    gradient: "from-emerald-500 to-teal-700",
   },
 ];
 

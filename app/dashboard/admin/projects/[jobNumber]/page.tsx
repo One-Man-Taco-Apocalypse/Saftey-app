@@ -5,6 +5,7 @@ import { Panel } from "@/components/dashboard/panel";
 import { Breadcrumbs } from "@/components/page-header";
 import { getPeople } from "@/lib/people";
 import { getProjectDetails } from "@/lib/projects";
+import { PageContainer } from "@/components/page-container";
 
 type Params = Promise<{ jobNumber: string }>;
 
@@ -42,7 +43,7 @@ function EditorSkeleton() {
 
 export default function EditProjectPage({ params }: { params: Params }) {
   return (
-    <div className="mx-auto w-full max-w-5xl p-4 md:p-8">
+    <PageContainer>
       <Breadcrumbs
         className="mb-2"
         items={[
@@ -54,6 +55,6 @@ export default function EditProjectPage({ params }: { params: Params }) {
       <Suspense fallback={<EditorSkeleton />}>
         <EditProject params={params} />
       </Suspense>
-    </div>
+    </PageContainer>
   );
 }

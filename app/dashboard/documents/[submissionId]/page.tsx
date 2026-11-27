@@ -7,7 +7,7 @@ import { AnswerView, type AnswerContext } from "@/components/documents/view/answ
 import { LocalDate } from "@/components/local-date";
 import { StatusPill } from "@/components/status-pill";
 import { documentTitle, formatDocumentNumber, type DocumentSignature } from "@/lib/documents";
-import { fieldsOnDocument, groupBySection, isStringList } from "@/lib/forms";
+import { fieldsOnDocument, fullWidthFieldIds, groupBySection, isStringList } from "@/lib/forms";
 import { personName } from "@/lib/person";
 import { getPeople } from "@/lib/people";
 import { getProjects } from "@/lib/projects";
@@ -16,6 +16,7 @@ import { getFileUrls, getSubmission } from "@/lib/submissions";
 import { getTemplate, getTemplateVersion } from "@/lib/templates";
 import { getCurrentUser } from "@/lib/user";
 import { cn, lookup } from "@/lib/utils";
+import { PageContainer } from "@/components/page-container";
 
 function MetaItem({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -129,9 +130,21 @@ async function CompletedDocument({ params }: { params: Promise<{ submissionId: s
               </h2>
             )}
             {group.items.length > 0 && (
-              <dl className={cn("divide-y divide-border", group.heading && "border-t border-border")}>
+              // Two columns on wide screens; gap-px over the border colour draws the lines
+              <dl
+                className={cn(
+                  "grid grid-cols-1 gap-px bg-border lg:grid-cols-2",
+                  group.heading && "border-t border-border",
+                )}
+              >
                 {group.items.map((field) => (
-                  <div key={field.id} className="p-4">
+                  <div
+                    key={field.id}
+                    className={cn(
+                      "min-w-0 bg-card p-4",
+                      fullWidthFieldIds(group.items).has(field.id) && "lg:col-span-2",
+                    )}
+                  >
                     <dt className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       {field.label}
                     </dt>
@@ -166,7 +179,7 @@ function DocumentSkeleton() {
 
 export default function CompletedDocumentPage({ params }: { params: Promise<{ submissionId: string }> }) {
   return (
-    <div className="mx-auto w-full max-w-4xl p-4 md:p-8">
+    <PageContainer width="form">
       <Breadcrumbs
         className="mb-3"
         items={[
@@ -180,6 +193,6 @@ export default function CompletedDocumentPage({ params }: { params: Promise<{ su
           <CompletedDocument params={params} />
         </Suspense>
       </Panel>
-    </div>
+    </PageContainer>
   );
 }

@@ -143,193 +143,202 @@ export function ProjectEditor({ project, people }: { project: ProjectDetails; pe
 
   return (
     <div className="flex flex-col gap-5">
-      <Panel>
-        <ModuleHeader title="Address" description="Where the project is" icon={MapPin} />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            {field("street", "Street address", { autoComplete: "address-line1" })}
+      {/* Address and roles side by side on wide screens */}
+      <div className="grid grid-cols-1 items-start gap-5 2xl:grid-cols-2">
+        <Panel>
+          <ModuleHeader title="Address" description="Where the project is" icon={MapPin} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              {field("street", "Street address", { autoComplete: "address-line1" })}
+            </div>
+            {field("unit", "Unit / suite (optional)", { autoComplete: "address-line2" })}
+            {field("city", "City", { autoComplete: "address-level2" })}
+            <div>
+              <label htmlFor="address-province" className="mb-1.5 block text-sm font-medium">
+                Province / territory
+              </label>
+              <SearchSelect
+                id="address-province"
+                value={address.province}
+                onChange={(v) => setField("province", v)}
+                placeholder="Choose…"
+                searchPlaceholder="Search provinces"
+                options={PROVINCES.map((p) => ({ value: p, label: p }))}
+              />
+            </div>
+            {field("postal_code", "Postal code", { autoComplete: "postal-code", placeholder: "A1A 1A1" })}
+            {field("country", "Country", { autoComplete: "country-name", placeholder: "Canada" })}
           </div>
-          {field("unit", "Unit / suite (optional)", { autoComplete: "address-line2" })}
-          {field("city", "City", { autoComplete: "address-level2" })}
-          <div>
-            <label htmlFor="address-province" className="mb-1.5 block text-sm font-medium">
-              Province / territory
-            </label>
-            <SearchSelect
-              id="address-province"
-              value={address.province}
-              onChange={(v) => setField("province", v)}
-              placeholder="Choose…"
-              searchPlaceholder="Search provinces"
-              options={PROVINCES.map((p) => ({ value: p, label: p }))}
-            />
-          </div>
-          {field("postal_code", "Postal code", { autoComplete: "postal-code", placeholder: "A1A 1A1" })}
-          {field("country", "Country", { autoComplete: "country-name", placeholder: "Canada" })}
-        </div>
 
-        {/* Map coordinates */}
-        <div className="mt-6 border-t border-border pt-5">
-          <h3 className="text-sm font-semibold">Map coordinates (optional)</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Decimal degrees. In Google Maps, right-click the spot and click the numbers to copy them, then
-            paste both into Latitude.
-          </p>
-          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {(["latitude", "longitude"] as const).map((kind) => {
-              const fieldError =
-                coordinateError(address[kind], kind) ??
-                (showErrors && coordsError && !address[kind].trim() ? coordsError : null);
-              return (
-                <div key={kind}>
-                  <label htmlFor={`address-${kind}`} className="mb-1.5 block text-sm font-medium capitalize">
-                    {kind}
-                  </label>
-                  <input
-                    id={`address-${kind}`}
-                    value={address[kind]}
-                    inputMode="decimal"
-                    placeholder={kind === "latitude" ? "43.6532" : "-79.3832"}
-                    onChange={(e) => setField(kind, e.target.value)}
-                    // Pasting "43.6532, -79.3832" fills both fields
-                    onPaste={(e) => {
-                      const pair = parseCoordinatePair(e.clipboardData.getData("text"));
-                      if (!pair) return;
-                      e.preventDefault();
-                      setAddress((prev) => ({ ...prev, ...pair }));
-                      setJustSaved(false);
-                    }}
-                    aria-invalid={fieldError ? true : undefined}
-                    aria-describedby={fieldError ? `address-${kind}-error` : undefined}
-                    className={cn(inputClass, fieldError && "border-red-400")}
-                  />
-                  {fieldError && (
-                    <p id={`address-${kind}-error`} className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-                      {fieldError}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+          {/* Map coordinates */}
+          <div className="mt-6 border-t border-border pt-5">
+            <h3 className="text-sm font-semibold">Map coordinates (optional)</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Decimal degrees. In Google Maps, right-click the spot and click the numbers to copy them, then
+              paste both into Latitude.
+            </p>
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {(["latitude", "longitude"] as const).map((kind) => {
+                const fieldError =
+                  coordinateError(address[kind], kind) ??
+                  (showErrors && coordsError && !address[kind].trim() ? coordsError : null);
+                return (
+                  <div key={kind}>
+                    <label
+                      htmlFor={`address-${kind}`}
+                      className="mb-1.5 block text-sm font-medium capitalize"
+                    >
+                      {kind}
+                    </label>
+                    <input
+                      id={`address-${kind}`}
+                      value={address[kind]}
+                      inputMode="decimal"
+                      placeholder={kind === "latitude" ? "43.6532" : "-79.3832"}
+                      onChange={(e) => setField(kind, e.target.value)}
+                      // Pasting "43.6532, -79.3832" fills both fields
+                      onPaste={(e) => {
+                        const pair = parseCoordinatePair(e.clipboardData.getData("text"));
+                        if (!pair) return;
+                        e.preventDefault();
+                        setAddress((prev) => ({ ...prev, ...pair }));
+                        setJustSaved(false);
+                      }}
+                      aria-invalid={fieldError ? true : undefined}
+                      aria-describedby={fieldError ? `address-${kind}-error` : undefined}
+                      className={cn(inputClass, fieldError && "border-red-400")}
+                    />
+                    {fieldError && (
+                      <p
+                        id={`address-${kind}-error`}
+                        className="mt-1.5 text-xs text-red-600 dark:text-red-400"
+                      >
+                        {fieldError}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {links && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <a
+                  href={links.google}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(secondaryButtonClass, "inline-flex items-center gap-1.5 py-1.5 text-xs")}
+                >
+                  Check in Google Maps <ExternalLink className="h-3.5 w-3.5" />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+                <a
+                  href={links.apple}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(secondaryButtonClass, "inline-flex items-center gap-1.5 py-1.5 text-xs")}
+                >
+                  Check in Apple Maps <ExternalLink className="h-3.5 w-3.5" />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+              </div>
+            )}
           </div>
-          {links && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              <a
-                href={links.google}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(secondaryButtonClass, "inline-flex items-center gap-1.5 py-1.5 text-xs")}
+        </Panel>
+
+        <Panel>
+          <ModuleHeader
+            title="Project roles"
+            description="Who fills each position on this project"
+            icon={UserCog}
+            tone="violet"
+            action={
+              <button
+                type="button"
+                onClick={addRole}
+                className={cn(secondaryButtonClass, "flex items-center gap-1.5")}
               >
-                Check in Google Maps <ExternalLink className="h-3.5 w-3.5" />
-                <span className="sr-only">(opens in a new tab)</span>
-              </a>
-              <a
-                href={links.apple}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(secondaryButtonClass, "inline-flex items-center gap-1.5 py-1.5 text-xs")}
-              >
-                Check in Apple Maps <ExternalLink className="h-3.5 w-3.5" />
-                <span className="sr-only">(opens in a new tab)</span>
-              </a>
+                <Plus className="h-4 w-4" />
+                Add role
+              </button>
+            }
+          />
+
+          {roles.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              No roles yet. Use <strong>Add role</strong> to add one.
+            </p>
+          ) : (
+            // No overflow-hidden here: it would cut off the worker dropdown when it opens
+            <div className="rounded-xl border border-border">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-border bg-muted/50 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th scope="col" className="w-[40%] rounded-tl-xl px-3 py-2.5">
+                      Position
+                    </th>
+                    <th scope="col" className="px-3 py-2.5">
+                      Worker
+                    </th>
+                    <th scope="col" className="w-12 rounded-tr-xl px-3 py-2.5">
+                      <span className="sr-only">Remove</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {roles.map((role, i) => {
+                    const worker = role.userId ? personById.get(role.userId) : undefined;
+                    const invalid = showErrors && !role.position.trim();
+                    return (
+                      <tr key={role.key} className="align-middle">
+                        <td className="px-3 py-2">
+                          <input
+                            value={role.position}
+                            onChange={(e) => updateRole(role.key, { position: e.target.value })}
+                            list={positionListId}
+                            placeholder="e.g. Foreman"
+                            aria-label={`Position, row ${i + 1}`}
+                            aria-invalid={invalid || undefined}
+                            className={cn(inputClass, "py-2", invalid && "border-red-400")}
+                          />
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <Avatar color={worker?.color ?? "#d1d5db"} className="h-8 w-8" />
+                            <SearchSelect
+                              value={role.userId}
+                              onChange={(v) => updateRole(role.key, { userId: v })}
+                              options={workerOptions}
+                              placeholder="Choose a worker…"
+                              searchPlaceholder="Search people"
+                              className="min-w-0 flex-1"
+                              aria-label={`Worker, row ${i + 1}`}
+                            />
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            type="button"
+                            onClick={() => removeRole(role.key)}
+                            aria-label={`Remove role, row ${i + 1}`}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-red-500/10 hover:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
-        </div>
-      </Panel>
-
-      <Panel>
-        <ModuleHeader
-          title="Project roles"
-          description="Who fills each position on this project"
-          icon={UserCog}
-          tone="violet"
-          action={
-            <button
-              type="button"
-              onClick={addRole}
-              className={cn(secondaryButtonClass, "flex items-center gap-1.5")}
-            >
-              <Plus className="h-4 w-4" />
-              Add role
-            </button>
-          }
-        />
-
-        {roles.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            No roles yet. Use <strong>Add role</strong> to add one.
-          </p>
-        ) : (
-          // No overflow-hidden here: it would cut off the worker dropdown when it opens
-          <div className="rounded-xl border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-border bg-muted/50 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th scope="col" className="w-[40%] rounded-tl-xl px-3 py-2.5">
-                    Position
-                  </th>
-                  <th scope="col" className="px-3 py-2.5">
-                    Worker
-                  </th>
-                  <th scope="col" className="w-12 rounded-tr-xl px-3 py-2.5">
-                    <span className="sr-only">Remove</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {roles.map((role, i) => {
-                  const worker = role.userId ? personById.get(role.userId) : undefined;
-                  const invalid = showErrors && !role.position.trim();
-                  return (
-                    <tr key={role.key} className="align-middle">
-                      <td className="px-3 py-2">
-                        <input
-                          value={role.position}
-                          onChange={(e) => updateRole(role.key, { position: e.target.value })}
-                          list={positionListId}
-                          placeholder="e.g. Foreman"
-                          aria-label={`Position, row ${i + 1}`}
-                          aria-invalid={invalid || undefined}
-                          className={cn(inputClass, "py-2", invalid && "border-red-400")}
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-2">
-                          <Avatar color={worker?.color ?? "#d1d5db"} className="h-8 w-8" />
-                          <SearchSelect
-                            value={role.userId}
-                            onChange={(v) => updateRole(role.key, { userId: v })}
-                            options={workerOptions}
-                            placeholder="Choose a worker…"
-                            searchPlaceholder="Search people"
-                            className="min-w-0 flex-1"
-                            aria-label={`Worker, row ${i + 1}`}
-                          />
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        <button
-                          type="button"
-                          onClick={() => removeRole(role.key)}
-                          aria-label={`Remove role, row ${i + 1}`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-red-500/10 hover:text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-        <datalist id={positionListId}>
-          {POSITION_SUGGESTIONS.map((p) => (
-            <option key={p} value={p} />
-          ))}
-        </datalist>
-      </Panel>
+          <datalist id={positionListId}>
+            {POSITION_SUGGESTIONS.map((p) => (
+              <option key={p} value={p} />
+            ))}
+          </datalist>
+        </Panel>
+      </div>
 
       {/* Save bar */}
       <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-end gap-3 rounded-xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur">

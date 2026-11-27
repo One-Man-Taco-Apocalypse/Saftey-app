@@ -63,7 +63,8 @@ export async function WorkforceCard() {
           when they&apos;re given a Foreman role on Edit projects.
         </p>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        // As many crews per row as fit (1 on phones, up to 3-4 on big screens)
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,26rem),1fr))] items-start gap-4">
           {crews.map(({ foremanId, memberIds }) => {
             const foreman = personById.get(foremanId);
             const members = memberIds.map((id) => personById.get(id)).filter((p): p is Person => !!p);
@@ -84,7 +85,7 @@ export async function WorkforceCard() {
                     No one on this crew yet
                   </p>
                 ) : (
-                  <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,11rem),1fr))] gap-2">
                     {members.map((m) => (
                       <WorkerCard key={m.user_id} person={m} />
                     ))}
@@ -103,7 +104,7 @@ export function WorkforceCardSkeleton() {
   return (
     <Module size="full">
       <div className="h-6 w-48 animate-pulse rounded-full bg-muted" />
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,26rem),1fr))] gap-4">
         <div className="h-40 animate-pulse rounded-xl bg-muted/60" />
         <div className="h-40 animate-pulse rounded-xl bg-muted/60" />
       </div>

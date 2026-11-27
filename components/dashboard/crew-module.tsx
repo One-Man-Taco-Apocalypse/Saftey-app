@@ -43,7 +43,7 @@ export function CrewModuleSkeleton({ size = "medium" }: { size?: ModuleSize } = 
           <div className="mt-2 h-7 w-28 animate-pulse rounded-full bg-muted" />
         </div>
       </div>
-      <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),1fr))] gap-2">
         <div className="h-14 animate-pulse rounded-xl bg-muted/60" />
         <div className="h-14 animate-pulse rounded-xl bg-muted/60" />
       </div>

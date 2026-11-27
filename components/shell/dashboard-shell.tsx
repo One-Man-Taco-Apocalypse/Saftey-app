@@ -64,7 +64,7 @@ export function DashboardShell({
       </aside>
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-card/95 px-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-card/95 px-4 backdrop-blur sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => setOpen(true)}

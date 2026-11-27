@@ -3,6 +3,7 @@ import { ProjectsTable } from "@/components/admin/projects-table";
 import { Panel } from "@/components/dashboard/panel";
 import { PageHeader } from "@/components/page-header";
 import { getProjects } from "@/lib/projects";
+import { PageContainer } from "@/components/page-container";
 
 async function Projects() {
   return <ProjectsTable projects={await getProjects()} />;
@@ -28,7 +29,7 @@ function ProjectsSkeleton() {
 // Admin: the project list. Click a project to set its address and roles.
 export default function EditProjectsPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl p-4 md:p-8">
+    <PageContainer>
       <PageHeader
         title="Edit projects"
         description="Choose a project to set its address and roles."
@@ -43,6 +44,6 @@ export default function EditProjectsPage() {
           <Projects />
         </Suspense>
       </Panel>
-    </div>
+    </PageContainer>
   );
 }

@@ -102,7 +102,8 @@ export function CrewModuleClient({
           No one on your crew yet
         </p>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-2">
+        // As many columns as fit: 1 on phones, 2 in the overview card, more on the full-width tab
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),1fr))] items-start gap-2">
           {crew.map((person) => (
             <div
               key={person.user_id}

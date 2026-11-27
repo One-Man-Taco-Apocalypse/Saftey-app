@@ -60,7 +60,7 @@ export async function JobInfoCard() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         {/* Left: location + team */}
         <div className="flex flex-col gap-6">
           <section>

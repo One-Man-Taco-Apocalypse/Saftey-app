@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 /**
  * Especially important if using Fluid compute: Don't put this client in a
@@ -7,6 +8,12 @@ import { cookies } from "next/headers";
  * it.
  */
 export async function createClient() {
+  // Supabase data is per user and per request. connection() tells Next.js not to
+  // run this while prerendering or prefetching: Supabase's login check reads the
+  // clock (Date.now) to test token expiry, which Next.js refuses to prerender
+  // ("encountered the unstable value Date.now()"). Our own time windows
+  // (e.g. "last 12 hours") run after this too.
+  await connection();
   const cookieStore = await cookies();
 
   return createServerClient(

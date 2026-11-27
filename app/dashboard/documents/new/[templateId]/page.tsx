@@ -7,6 +7,7 @@ import { getCrewIds, getPeople } from "@/lib/people";
 import { getProjects, getProjectSettings } from "@/lib/projects";
 import { getLatestVersion, getTemplate } from "@/lib/templates";
 import { getCurrentUser } from "@/lib/user";
+import { PageContainer } from "@/components/page-container";
 
 async function FillDocument({ params }: { params: Promise<{ templateId: string }> }) {
   const { templateId } = await params;
@@ -60,7 +61,7 @@ function FormSkeleton() {
 
 export default function FillDocumentPage({ params }: { params: Promise<{ templateId: string }> }) {
   return (
-    <div className="mx-auto w-full max-w-4xl p-4 md:p-8">
+    <PageContainer width="form">
       <Breadcrumbs
         className="mb-3"
         items={[
@@ -74,6 +75,6 @@ export default function FillDocumentPage({ params }: { params: Promise<{ templat
           <FillDocument params={params} />
         </Suspense>
       </Panel>
-    </div>
+    </PageContainer>
   );
 }

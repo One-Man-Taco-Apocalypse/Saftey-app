@@ -3,6 +3,7 @@ import type { TemplateField } from "@/lib/documents";
 import {
   buildDocumentRequests,
   fieldsOnDocument,
+  fullWidthFieldIds,
   finalAnswer,
   groupBySection,
   initialAnswers,
@@ -63,7 +64,10 @@ describe("toLocalInputValue", () => {
 
 describe("visibleFields", () => {
   it("hides showIf fields until the other field has the value", () => {
-    const fields = [f("division", "select"), f("other", "text", { showIf: { field: "division", equals: "Other" } })];
+    const fields = [
+      f("division", "select"),
+      f("other", "text", { showIf: { field: "division", equals: "Other" } }),
+    ];
     expect(visibleFields(fields, { division: "Painter" }).map((x) => x.id)).toEqual(["division"]);
     expect(visibleFields(fields, { division: "Other" }).map((x) => x.id)).toEqual(["division", "other"]);
   });
@@ -158,5 +162,25 @@ describe("fieldsOnDocument + groupBySection", () => {
       ["s1", ["a"]],
       ["s3", ["b"]],
     ]);
+  });
+});
+
+describe("fullWidthFieldIds", () => {
+  it("pairs short fields and stretches one left alone", () => {
+    const fields = [
+      f("a", "text"),
+      f("b", "date"),
+      f("c", "text"), // alone before a section
+      f("s", "section"),
+      f("d", "select"),
+      f("e", "person"),
+      f("g", "number"), // alone at the end
+    ];
+    expect([...fullWidthFieldIds(fields)].sort()).toEqual(["c", "g", "s"]);
+  });
+
+  it("always gives long fields the full width", () => {
+    const fields = [f("t", "text"), f("notes", "textarea"), f("sig", "signatures")];
+    expect([...fullWidthFieldIds(fields)].sort()).toEqual(["notes", "sig", "t"]);
   });
 });

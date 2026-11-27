@@ -16,6 +16,7 @@ import { getSignatureProgress, isAwaitingSignatures } from "@/lib/signatures";
 import { getSubmissions } from "@/lib/submissions";
 import { getAllTemplates } from "@/lib/templates";
 import { cn, lookup } from "@/lib/utils";
+import { PageContainer } from "@/components/page-container";
 
 type SearchParams = Promise<{ q?: string | string[] }>;
 
@@ -201,7 +202,7 @@ function ListSkeleton() {
 
 export default function DocumentsPage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <div className="mx-auto w-full max-w-7xl p-4 md:p-8">
+    <PageContainer>
       <PageHeader
         title="Documents"
         description="All completed documents, newest first."
@@ -221,6 +222,6 @@ export default function DocumentsPage({ searchParams }: { searchParams: SearchPa
         {/* TEMPORARY: testing tool, remove later (see the component) */}
         <ClearAllDocuments />
       </Panel>
-    </div>
+    </PageContainer>
   );
 }

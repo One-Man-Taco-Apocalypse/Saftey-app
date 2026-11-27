@@ -28,7 +28,7 @@ export function ProjectMap({
   const valid = latitude.trim() && longitude.trim() && !coordinatesError(latitude, longitude);
   if (!valid) {
     return (
-      <div className="flex h-full min-h-56 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/40 p-6 text-center">
+      <div className="flex h-full min-h-56 flex-col items-center lg:min-h-80 justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/40 p-6 text-center">
         <MapPin className="h-6 w-6 text-muted-foreground" />
         <p className="text-sm font-medium">No map location yet</p>
         <p className="text-xs text-muted-foreground">
@@ -57,7 +57,7 @@ export function ProjectMap({
         src={embedUrl(lat, lng)}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
-        className="min-h-56 w-full flex-1 rounded-xl border border-border bg-muted"
+        className="min-h-56 w-full flex-1 rounded-xl lg:min-h-80 2xl:min-h-[26rem] border border-border bg-muted"
       />
       <div className="flex flex-wrap items-center gap-2">
         <a href={links.google} target="_blank" rel="noopener noreferrer" className={linkClass}>

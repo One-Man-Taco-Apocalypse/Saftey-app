@@ -68,7 +68,9 @@ export function ChangeCrewPanel({
                         <span className="ml-1.5 text-xs font-normal text-muted-foreground">(You)</span>
                       )}
                     </p>
-                    <p className="truncate text-xs text-muted-foreground">{person.position ?? person.email}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {person.position ?? person.email}
+                    </p>
                   </div>
                   <button
                     type="button"

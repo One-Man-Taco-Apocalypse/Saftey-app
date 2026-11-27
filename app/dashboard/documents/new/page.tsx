@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Panel } from "@/components/dashboard/panel";
 import { PageHeader } from "@/components/page-header";
 import { getTemplates } from "@/lib/templates";
+import { PageContainer } from "@/components/page-container";
 
 async function TemplateList() {
   const templates = await getTemplates();
@@ -52,7 +53,7 @@ function TemplateListSkeleton() {
 
 export default function CreateDocumentPage() {
   return (
-    <div className="mx-auto w-full max-w-4xl p-4 md:p-8">
+    <PageContainer width="form">
       <PageHeader
         title="Create document"
         description="Choose a document to fill in."
@@ -63,6 +64,6 @@ export default function CreateDocumentPage() {
           <TemplateList />
         </Suspense>
       </Panel>
-    </div>
+    </PageContainer>
   );
 }

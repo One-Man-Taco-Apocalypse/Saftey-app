@@ -99,7 +99,11 @@ export function validateForm(fields: TemplateField[], state: FormState): Record<
 
 // The value saved for a field that isn't a file. (Files are uploaded first and
 // saved as their storage paths; see lib/submit-document.ts.)
-export function finalAnswer(field: TemplateField, value: AnswerValue | undefined, userId: string): AnswerValue {
+export function finalAnswer(
+  field: TemplateField,
+  value: AnswerValue | undefined,
+  userId: string,
+): AnswerValue {
   switch (field.type) {
     case "completed_by":
       return (value as string) || userId;
@@ -153,3 +157,37 @@ export function groupBySection(fields: TemplateField[]): FieldGroup[] {
 
 export const isStringList = (v: AnswerValue | undefined): v is string[] =>
   Array.isArray(v) && v.every((x) => typeof x === "string");
+
+// --- Two-column layout on wide screens ------------------------------------------------
+
+// Field types that always take the full width (long text, drawings, tables, headings)
+const FULL_WIDTH_TYPES = new Set<FieldType>([
+  "section",
+  "textarea",
+  "photos",
+  "signature",
+  "signatures",
+  "yes_no_na",
+  "checkbox",
+]);
+
+// Which fields take the full row on a two-column layout. Short fields sit side
+// by side; one left alone on its row (before a full-width field, or at the end)
+// is stretched so there's no empty gap.
+export function fullWidthFieldIds(fields: TemplateField[]): Set<string> {
+  const full = new Set<string>();
+  let column = 0; // 0 = starting a new row, 1 = right half
+  fields.forEach((f, i) => {
+    if (FULL_WIDTH_TYPES.has(f.type)) {
+      full.add(f.id);
+      column = 0;
+    } else if (column === 0) {
+      const next = fields[i + 1];
+      if (!next || FULL_WIDTH_TYPES.has(next.type)) full.add(f.id);
+      else column = 1;
+    } else {
+      column = 0;
+    }
+  });
+  return full;
+}
