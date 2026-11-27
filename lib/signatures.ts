@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { DocumentRequest, DocumentSignature } from "@/lib/documents";
 
@@ -62,7 +63,8 @@ export type OutstandingSignature = {
 };
 
 // Documents waiting for this user's signature, newest request first.
-export async function getOutstandingSignatures(userId: string): Promise<OutstandingSignature[]> {
+// Cached: the dashboard card and the notification bell share one query.
+export const getOutstandingSignatures = cache(async (userId: string): Promise<OutstandingSignature[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("document_signatures")
@@ -74,7 +76,7 @@ export async function getOutstandingSignatures(userId: string): Promise<Outstand
     .order("created_at", { ascending: false });
   if (error) console.error("getOutstandingSignatures:", error.message);
   return (data as unknown as OutstandingSignature[] | null) ?? [];
-}
+});
 
 // A document is complete once every requested person has signed.
 export function isAwaitingSignatures(p: SignatureProgress | undefined) {
@@ -91,7 +93,7 @@ export type MyDocumentRequest = {
 
 // Documents this user has been asked to complete and hasn't yet, newest first.
 // Submitting that type of document completes them (see submit_document).
-export async function getMyDocumentRequests(userId: string): Promise<MyDocumentRequest[]> {
+export const getMyDocumentRequests = cache(async (userId: string): Promise<MyDocumentRequest[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("document_requests")
@@ -103,7 +105,7 @@ export async function getMyDocumentRequests(userId: string): Promise<MyDocumentR
     .order("created_at", { ascending: false });
   if (error) console.error("getMyDocumentRequests:", error.message);
   return (data as unknown as MyDocumentRequest[] | null) ?? [];
-}
+});
 
 // Requests a document made (e.g. the Harness Inspections a PSA asked for).
 export async function getRequestsFrom(submissionId: string): Promise<DocumentRequest[]> {

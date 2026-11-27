@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { PHOTO_BUCKET } from "@/lib/documents";
 import { createClient } from "@/lib/supabase/client";
 import { SignaturePad } from "./signature-pad";
+import { randomId } from "@/lib/uuid";
 
 // Lets the signed-in user add THEIR signature to a document they were asked to
 // sign. Only their own request row changes; the rest of the document can't be
@@ -53,7 +54,7 @@ export function SignRequest({
     }
 
     // Your own folder: <your uid>/<document id>/<file>
-    const path = `${userId}/${submissionId}/${fieldId}-${userId}-${crypto.randomUUID()}.png`;
+    const path = `${userId}/${submissionId}/${fieldId}-${userId}-${randomId()}.png`;
     const { error: uploadError } = await supabase.storage
       .from(PHOTO_BUCKET)
       .upload(path, png, { contentType: "image/png" });
@@ -104,7 +105,7 @@ export function SignRequest({
         type="button"
         onClick={sign}
         disabled={saving}
-        className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:opacity-60 sm:w-auto"
+        className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:opacity-60 sm:w-auto"
       >
         {saving && <Loader2 className="h-4 w-4 animate-spin" />}
         {saving ? "Saving…" : "Sign document"}

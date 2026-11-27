@@ -10,10 +10,7 @@ export async function ProjectModule() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
-  const [projects, { favorites, current }] = await Promise.all([
-    getProjects(),
-    getProjectSettings(user.id),
-  ]);
+  const [projects, { favorites, current }] = await Promise.all([getProjects(), getProjectSettings(user.id)]);
   return (
     <ProjectModuleClient
       userId={user.id}
@@ -29,13 +26,13 @@ export function ProjectModuleSkeleton() {
   return (
     <Module size="medium">
       <div className="flex items-start gap-4">
-        <div className="h-11 w-11 animate-pulse rounded-2xl bg-foreground/10" />
+        <div className="h-11 w-11 animate-pulse rounded-xl bg-muted" />
         <div className="flex-1">
-          <div className="h-4 w-28 animate-pulse rounded-full bg-foreground/10" />
-          <div className="mt-2 h-7 w-48 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-4 w-28 animate-pulse rounded-full bg-muted" />
+          <div className="mt-2 h-7 w-48 animate-pulse rounded-full bg-muted" />
         </div>
       </div>
-      <div className="mt-6 h-14 animate-pulse rounded-2xl bg-foreground/5" />
+      <div className="mt-6 h-14 animate-pulse rounded-xl bg-muted/60" />
     </Module>
   );
 }

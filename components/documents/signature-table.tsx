@@ -6,6 +6,7 @@ import { personName, type Person } from "@/lib/person";
 import { cn } from "@/lib/utils";
 import { personOption, SearchSelect } from "./search-select";
 import { SignaturePad } from "./signature-pad";
+import { randomId } from "@/lib/uuid";
 
 export type SignatureRow = {
   key: string; // stable id for React, so each pad keeps its drawing
@@ -16,7 +17,7 @@ export type SignatureRow = {
 // `key` is random by default. Rows that exist when the page first loads must pass
 // a fixed key: the page is drawn on the server and again in the browser, and a
 // random key would differ between the two (a hydration mismatch).
-export function newSignatureRow(userId = "", key: string = crypto.randomUUID()): SignatureRow {
+export function newSignatureRow(userId = "", key: string = randomId()): SignatureRow {
   return { key, userId, png: null };
 }
 
@@ -26,11 +27,7 @@ export type QuickAddGroup = { label: string; userIds: string[] };
 // Adds everyone in `userIds` who isn't already a signer, in the group's order.
 // Unsigned rows still waiting for someone to be chosen are filled first, so they
 // aren't left over empty. The first row ("Completed by") is never changed.
-export function addSigners(
-  rows: SignatureRow[],
-  userIds: string[],
-  validIds: Set<string>,
-): SignatureRow[] {
+export function addSigners(rows: SignatureRow[], userIds: string[], validIds: Set<string>): SignatureRow[] {
   const taken = new Set(rows.map((r) => r.userId).filter(Boolean));
   const toAdd = [...new Set(userIds)].filter((id) => validIds.has(id) && !taken.has(id));
   if (toAdd.length === 0) return rows;
@@ -83,7 +80,7 @@ export function SignatureTable({
           <div
             key={row.key}
             className={cn(
-              "rounded-2xl border border-white/60 bg-white/50 p-3 dark:border-white/10 dark:bg-white/5",
+              "rounded-xl border border-border bg-muted/40 p-3",
               missing && "border-red-400 dark:border-red-400",
             )}
           >
@@ -96,14 +93,16 @@ export function SignatureTable({
                     <p className="truncate text-sm font-medium">
                       {person ? personName(person) : `Choose the ${firstSignerLabel.toLowerCase()} above`}
                       <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                        ({firstSignerLabel}{row.userId === currentUserId ? " · You" : ""})
+                        ({firstSignerLabel}
+                        {row.userId === currentUserId ? " · You" : ""})
                       </span>
                     </p>
-                    {person?.position && (
-                      <p className="text-xs text-muted-foreground">{person.position}</p>
-                    )}
+                    {person?.position && <p className="text-xs text-muted-foreground">{person.position}</p>}
                   </div>
-                  <Lock className="h-4 w-4 shrink-0 text-muted-foreground" aria-label={`Set by ${firstSignerLabel}`} />
+                  <Lock
+                    className="h-4 w-4 shrink-0 text-muted-foreground"
+                    aria-label={`Set by ${firstSignerLabel}`}
+                  />
                 </>
               ) : (
                 // Other rows: pick who's signing
@@ -132,10 +131,7 @@ export function SignatureTable({
               )}
             </div>
 
-            <SignaturePad
-              id={`signature-${row.key}`}
-              onChange={(png) => update(row.key, { png })}
-            />
+            <SignaturePad id={`signature-${row.key}`} onChange={(png) => update(row.key, { png })} />
             {row.userId && !row.png && (
               <p className="mt-1.5 text-xs text-muted-foreground">
                 Not signed yet — they&apos;ll be asked to sign after you submit.
@@ -149,7 +145,7 @@ export function SignatureTable({
         type="button"
         onClick={() => onChange([...rows, newSignatureRow()])}
         disabled={rows.length >= people.length && people.length > 0}
-        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-foreground/15 p-3 text-sm font-medium text-muted-foreground transition hover:border-sky-400 hover:bg-sky-500/5 hover:text-sky-600 disabled:opacity-50"
+        className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-3 text-sm font-medium text-muted-foreground transition hover:border-sky-400 hover:bg-sky-500/5 hover:text-sky-600 disabled:opacity-50"
       >
         <UserPlus className="h-4 w-4" />
         Add person
@@ -179,7 +175,7 @@ export function SignatureTable({
                       : `Add ${remaining.length} ${remaining.length === 1 ? "person" : "people"} from ${group.label.toLowerCase()}`
                 }
                 // No pointer-events-none when disabled, so the title tooltip still shows on hover
-                className="flex items-center gap-1.5 rounded-full border border-white/70 bg-white/60 px-3 py-1.5 text-sm font-medium transition enabled:hover:bg-white/90 enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/15 dark:bg-white/10 dark:enabled:hover:bg-white/15"
+                className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium transition enabled:hover:bg-muted enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Users className="h-3.5 w-3.5" />
                 {group.label}

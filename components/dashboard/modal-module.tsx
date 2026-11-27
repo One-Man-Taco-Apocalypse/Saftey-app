@@ -27,17 +27,14 @@ export function ModalModule({
     <>
       <Module
         size={size}
-        className={cn(
-          "transition duration-200 hover:-translate-y-0.5 hover:bg-white/70 dark:hover:bg-white/10",
-          className,
-        )}
+        className={cn("transition duration-200 hover:-translate-y-0.5 hover:bg-muted", className)}
       >
         {/* Invisible button covering the whole card, so the entire card is clickable */}
         <button
           type="button"
           onClick={() => dialogRef.current?.showModal()}
           aria-label={`Open ${title}`}
-          className="absolute inset-0 z-10 rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+          className="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
         />
         {children}
       </Module>

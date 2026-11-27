@@ -10,7 +10,7 @@ import { getMyDocumentRequests, getOutstandingSignatures } from "@/lib/signature
 import { getAllTemplates, lookup } from "@/lib/submissions";
 import { getCurrentUser } from "@/lib/user";
 import { SignatureRequestsLiveRefresh } from "./live-refresh";
-import { Module } from "./module-grid";
+import { Module, ModuleHeader } from "./module-grid";
 
 // Documents waiting for the signed-in user's signature. Updates live.
 export async function SignaturesModule() {
@@ -29,34 +29,25 @@ export async function SignaturesModule() {
   const personById = lookup(people, (p) => p.user_id);
 
   return (
-    <Module size="medium">
-      <SignatureRequestsLiveRefresh
-        userIds={[user.id]}
-        channelName="my-signature-requests"
-        includeRequests
+    <Module size="medium" id="signatures" className="scroll-mt-20">
+      <SignatureRequestsLiveRefresh userIds={[user.id]} channelName="my-signature-requests" includeRequests />
+
+      <ModuleHeader
+        title="Waiting on you"
+        description={`${requests.length} to sign · ${docRequests.length} requested`}
+        icon={PenLine}
+        tone="amber"
       />
 
-      <div className="flex items-center gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
-          <PenLine className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-muted-foreground">Signatures needed</p>
-          <p className="mt-0.5 text-2xl font-semibold tracking-tight">
-            {requests.length} {requests.length === 1 ? "document" : "documents"}
-          </p>
-        </div>
-      </div>
-
       {requests.length === 0 && docRequests.length === 0 ? (
-        <p className="mt-5 flex items-center justify-center gap-2 rounded-2xl border border-dashed border-foreground/15 p-4 text-center text-sm text-muted-foreground">
+        <p className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
           You&apos;re all caught up
         </p>
       ) : requests.length === 0 ? (
-        <p className="mt-5 text-center text-sm text-muted-foreground">No signatures needed</p>
+        <p className="text-center text-sm text-muted-foreground">No signatures needed</p>
       ) : (
-        <div className="mt-5 flex max-h-80 flex-col gap-2 overflow-y-auto">
+        <div className="flex max-h-80 flex-col gap-2 overflow-y-auto">
           {requests.map((r) => {
             const template = r.submission ? templateById.get(r.submission.template_id) : undefined;
             const job = r.submission?.job_number;
@@ -66,7 +57,7 @@ export async function SignaturesModule() {
               <Link
                 key={r.id}
                 href={`/dashboard/documents/${r.submission_id}#sign`}
-                className="group flex items-center gap-3 rounded-2xl border border-white/60 bg-white/50 p-3 transition hover:-translate-y-0.5 hover:bg-white/80 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                className="group flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3 transition hover:-translate-y-0.5 hover:bg-muted"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium">
@@ -88,7 +79,7 @@ export async function SignaturesModule() {
                 <span className="hidden shrink-0 text-xs text-muted-foreground sm:block">
                   <LocalDate iso={r.created_at} />
                 </span>
-                <span className="shrink-0 rounded-full bg-sky-600 px-3 py-1 text-xs font-medium text-white transition group-hover:bg-sky-700">
+                <span className="shrink-0 rounded-lg bg-sky-600 px-3 py-1 text-xs font-medium text-white transition group-hover:bg-sky-700">
                   Sign
                 </span>
                 <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5" />
@@ -111,7 +102,7 @@ export async function SignaturesModule() {
                 <Link
                   key={r.id}
                   href={`/dashboard/documents/new/${r.template_id}`}
-                  className="group flex items-center gap-3 rounded-2xl border border-white/60 bg-white/50 p-3 transition hover:-translate-y-0.5 hover:bg-white/80 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                  className="group flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3 transition hover:-translate-y-0.5 hover:bg-muted"
                 >
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400">
                     <Send className="h-4 w-4" />
@@ -129,7 +120,7 @@ export async function SignaturesModule() {
                         .join(" · ")}
                     </span>
                   </span>
-                  <span className="shrink-0 rounded-full bg-sky-600 px-3 py-1 text-xs font-medium text-white transition group-hover:bg-sky-700">
+                  <span className="shrink-0 rounded-lg bg-sky-600 px-3 py-1 text-xs font-medium text-white transition group-hover:bg-sky-700">
                     Start
                   </span>
                 </Link>
@@ -147,13 +138,13 @@ export function SignaturesModuleSkeleton() {
   return (
     <Module size="medium">
       <div className="flex items-center gap-4">
-        <div className="h-11 w-11 animate-pulse rounded-2xl bg-foreground/10" />
+        <div className="h-11 w-11 animate-pulse rounded-xl bg-muted" />
         <div className="flex-1">
-          <div className="h-4 w-32 animate-pulse rounded-full bg-foreground/10" />
-          <div className="mt-2 h-7 w-36 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
+          <div className="mt-2 h-7 w-36 animate-pulse rounded-full bg-muted" />
         </div>
       </div>
-      <div className="mt-5 h-14 animate-pulse rounded-2xl bg-foreground/5" />
+      <div className="mt-5 h-14 animate-pulse rounded-xl bg-muted/60" />
     </Module>
   );
 }

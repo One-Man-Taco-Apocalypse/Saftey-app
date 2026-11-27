@@ -1,9 +1,18 @@
+<<<<<<< Updated upstream
 import { Check, ChevronLeft, Clock, FolderKanban, Minus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { GlassCard } from "@/components/dashboard/glass-card";
+=======
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { Avatar } from "@/components/avatar";
+import { Panel } from "@/components/dashboard/panel";
+import { Breadcrumbs } from "@/components/page-header";
+import { AnswerView, type AnswerContext } from "@/components/documents/view/answer-view";
+>>>>>>> Stashed changes
 import { LocalDate } from "@/components/local-date";
 import { SignRequest } from "@/components/documents/sign-request";
 import {
@@ -365,6 +374,7 @@ async function CompletedDocument({
       </div>
 
       {/* Number, who and when */}
+<<<<<<< Updated upstream
       <dl className="mt-4 grid grid-cols-1 gap-3 rounded-2xl border border-white/60 bg-white/50 p-4 text-sm sm:grid-cols-3 dark:border-white/10 dark:bg-white/5">
         <div>
           <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -391,12 +401,34 @@ async function CompletedDocument({
             <LocalDate iso={submission.submitted_at} withTime />
           </dd>
         </div>
+=======
+      <dl className="mt-4 grid grid-cols-1 gap-3 rounded-xl border border-border bg-muted/40 p-4 text-sm sm:grid-cols-3">
+        <MetaItem label="Document no.">
+          <span className="font-semibold tabular-nums">
+            {formatDocumentNumber(submission.document_number)}
+          </span>
+        </MetaItem>
+        <MetaItem label="Submitted by">
+          <span className="flex items-center gap-2">
+            {submitter && <Avatar color={submitter.color} className="h-6 w-6" />}
+            {submitter ? personName(submitter) : "Unknown"}
+          </span>
+        </MetaItem>
+        <MetaItem label="Submitted">
+          <LocalDate iso={submission.submitted_at} withTime />
+        </MetaItem>
+>>>>>>> Stashed changes
       </dl>
 
       {/* The answers, in the form's order. Each section is its own list with
           its heading above it (a heading can't go inside a <dl>). */}
+<<<<<<< Updated upstream
       <div className="mt-6 divide-y divide-foreground/10 overflow-hidden rounded-2xl border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/5">
         {groups.map((group, g) => (
+=======
+      <div className="mt-6 divide-y divide-border overflow-hidden rounded-xl border border-border bg-muted/40">
+        {groupBySection(fields).map((group, g) => (
+>>>>>>> Stashed changes
           <section key={group.heading?.id ?? `group-${g}`} aria-label={group.heading?.label}>
             {group.heading && (
               <h2 className="bg-foreground/[0.03] px-4 py-3 text-sm font-semibold tracking-tight">
@@ -404,7 +436,7 @@ async function CompletedDocument({
               </h2>
             )}
             {group.items.length > 0 && (
-              <dl className={cn("divide-y divide-foreground/10", group.heading && "border-t border-foreground/10")}>
+              <dl className={cn("divide-y divide-border", group.heading && "border-t border-border")}>
                 {group.items.map((field) => (
                   <div key={field.id} className="p-4">
                     <dt className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -442,9 +474,9 @@ async function CompletedDocument({
 function DocumentSkeleton() {
   return (
     <div>
-      <div className="h-4 w-32 animate-pulse rounded-full bg-foreground/10" />
-      <div className="mt-2 h-8 w-72 max-w-full animate-pulse rounded-full bg-foreground/10" />
-      <div className="mt-8 h-64 animate-pulse rounded-2xl bg-foreground/5" />
+      <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
+      <div className="mt-2 h-8 w-72 max-w-full animate-pulse rounded-full bg-muted" />
+      <div className="mt-8 h-64 animate-pulse rounded-xl bg-muted/60" />
     </div>
   );
 }
@@ -455,19 +487,20 @@ export default function CompletedDocumentPage({
   params: Promise<{ submissionId: string }>;
 }) {
   return (
-    <div className="mx-auto w-full max-w-3xl p-4 md:p-8">
-      <Link
-        href="/dashboard/documents"
-        className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        All documents
-      </Link>
-      <GlassCard>
+    <div className="mx-auto w-full max-w-4xl p-4 md:p-8">
+      <Breadcrumbs
+        className="mb-3"
+        items={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Documents", href: "/dashboard/documents" },
+          { label: "View document" },
+        ]}
+      />
+      <Panel>
         <Suspense fallback={<DocumentSkeleton />}>
           <CompletedDocument params={params} />
         </Suspense>
-      </GlassCard>
+      </Panel>
     </div>
   );
 }

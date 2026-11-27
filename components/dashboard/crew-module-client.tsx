@@ -22,7 +22,7 @@ import { personName, type Person } from "@/lib/person";
 import { saveUserSettings } from "@/lib/save-settings";
 import { cn } from "@/lib/utils";
 import { SignatureRequestsLiveRefresh } from "./live-refresh";
-import { Module } from "./module-grid";
+import { Module, ModuleHeader, type ModuleSize } from "./module-grid";
 import { PopupButton } from "./popup";
 
 // One crew member's documents from the last 12 hours, grouped by document type,
@@ -146,12 +146,14 @@ function PersonDetails({ person }: { person: Person }) {
 }
 
 export function CrewModuleClient({
+  size = "medium",
   userId,
   people,
   initialCrew,
   crewDocuments,
   templateNames,
 }: {
+  size?: ModuleSize;
   userId: string;
   people: Person[];
   initialCrew: string[];
@@ -175,7 +177,8 @@ export function CrewModuleClient({
     const error = await saveUserSettings(userId, { crew_members: next });
     setSaving(false);
     setSaveError(error);
-    if (error) setCrewIds(previous); // undo on the screen
+    if (error)
+      setCrewIds(previous); // undo on the screen
     else router.refresh(); // load documents for anyone just added
   }
 
@@ -268,6 +271,7 @@ export function CrewModuleClient({
   );
 
   return (
+<<<<<<< Updated upstream
     <Module size="medium">
       <div className="flex items-center gap-4">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-500/15 text-violet-600 dark:text-violet-400">
@@ -289,6 +293,34 @@ export function CrewModuleClient({
           Change crew
         </PopupButton>
       </div>
+=======
+    <Module size={size} id="crew" className="scroll-mt-20">
+      <ModuleHeader
+        title="My crew"
+        description={`${crew.length} ${crew.length === 1 ? "person" : "people"} · documents from the last 12 hours`}
+        icon={Users}
+        tone="violet"
+        action={
+          <PopupButton
+            title="Change Crew"
+            popup={
+              <ChangeCrewPanel
+                people={people}
+                crewIds={crewIds}
+                currentUserId={userId}
+                saving={saving}
+                saveError={saveError}
+                onToggle={toggleMember}
+              />
+            }
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Change crew
+          </PopupButton>
+        }
+      />
+>>>>>>> Stashed changes
 
       {/* Live: updates as soon as a crew member signs, is asked to, or submits a
           document; every 5 minutes it also re-checks the 12-hour window */}
@@ -303,20 +335,20 @@ export function CrewModuleClient({
       {/* One card per crew member: their name (opens their popup), then their
           documents from the last 12 hours with their own status on each */}
       {crew.length === 0 ? (
-        <p className="mt-5 rounded-2xl border border-dashed border-foreground/15 p-4 text-center text-sm text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
           No one on your crew yet
         </p>
       ) : (
-        <div className="mt-5 grid grid-cols-1 items-start gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-2">
           {crew.map((person) => (
             <div
               key={person.user_id}
-              className="flex flex-col gap-2 rounded-2xl border border-white/60 bg-white/50 p-2 dark:border-white/10 dark:bg-white/5"
+              className="flex flex-col gap-2 rounded-xl border border-border bg-muted/40 p-2"
             >
               <PopupButton
                 title={personName(person)}
                 popup={<PersonDetails person={person} />}
-                className="flex items-center gap-3 p-1 hover:bg-white/60 dark:hover:bg-white/10"
+                className="flex items-center gap-3 p-1 hover:bg-muted"
               >
                 <Avatar color={person.color} className="h-8 w-8" />
                 <span className="min-w-0">

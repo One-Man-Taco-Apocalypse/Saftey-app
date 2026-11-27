@@ -3,12 +3,12 @@ import { getCrewDocuments } from "@/lib/crew-documents";
 import { getCrewIds, getPeople } from "@/lib/people";
 import { getAllTemplates } from "@/lib/submissions";
 import { getCurrentUser } from "@/lib/user";
-import { Module } from "./module-grid";
+import { Module, type ModuleSize } from "./module-grid";
 import { CrewModuleClient } from "./crew-module-client";
 
 // Loads everyone + the user's crew + the crew's documents from the last 12 hours
 // on the server, then hands them to the interactive card.
-export async function CrewModule() {
+export async function CrewModule({ size = "medium" }: { size?: ModuleSize } = {}) {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
@@ -22,6 +22,7 @@ export async function CrewModule() {
 
   return (
     <CrewModuleClient
+      size={size}
       userId={user.id}
       people={people}
       initialCrew={crewIds}
@@ -32,19 +33,19 @@ export async function CrewModule() {
 }
 
 // Placeholder shown while the crew loads.
-export function CrewModuleSkeleton() {
+export function CrewModuleSkeleton({ size = "medium" }: { size?: ModuleSize } = {}) {
   return (
-    <Module size="medium">
+    <Module size={size}>
       <div className="flex items-center gap-4">
-        <div className="h-11 w-11 animate-pulse rounded-2xl bg-foreground/10" />
+        <div className="h-11 w-11 animate-pulse rounded-xl bg-muted" />
         <div className="flex-1">
-          <div className="h-4 w-16 animate-pulse rounded-full bg-foreground/10" />
-          <div className="mt-2 h-7 w-28 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-4 w-16 animate-pulse rounded-full bg-muted" />
+          <div className="mt-2 h-7 w-28 animate-pulse rounded-full bg-muted" />
         </div>
       </div>
       <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <div className="h-14 animate-pulse rounded-2xl bg-foreground/5" />
-        <div className="h-14 animate-pulse rounded-2xl bg-foreground/5" />
+        <div className="h-14 animate-pulse rounded-xl bg-muted/60" />
+        <div className="h-14 animate-pulse rounded-xl bg-muted/60" />
       </div>
     </Module>
   );

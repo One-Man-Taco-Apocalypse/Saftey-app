@@ -30,7 +30,7 @@ export function JobPicker({
         type="button"
         onClick={() => dialogRef.current?.showModal()}
         className={cn(
-          "group flex w-full items-center gap-3 rounded-xl border border-white/70 bg-white/60 p-3 text-left transition hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15",
+          "group flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40",
           invalid && "border-red-400 dark:border-red-400",
         )}
       >
@@ -55,11 +55,11 @@ export function JobPicker({
 
       <PopupDialog dialogRef={dialogRef} title="Choose a job">
         {projects.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-foreground/15 p-4 text-center text-sm text-muted-foreground">
+          <p className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
             No projects found
           </p>
         ) : (
-          <div className="divide-y divide-foreground/10 overflow-hidden rounded-2xl border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/5">
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-muted/40">
             {projects.map((project) => {
               const isSelected = project.job_number === value;
               return (
@@ -71,7 +71,7 @@ export function JobPicker({
                     dialogRef.current?.close();
                   }}
                   className={cn(
-                    "flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-foreground/5",
+                    "flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-muted",
                     isSelected && "bg-sky-500/10",
                   )}
                 >

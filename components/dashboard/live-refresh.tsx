@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { randomId } from "@/lib/uuid";
 
 // Re-loads the page's server data when documents change for the given people:
 //   * their signature requests (asked to sign, or signed, on any device)
@@ -41,6 +42,7 @@ export function SignatureRequestsLiveRefresh({
       await supabase.realtime.setAuth(); // send the user's login so security rules apply
       if (cancelled) return;
       // Fresh name each time, so a quick remount never reuses a channel that's closing
+<<<<<<< Updated upstream
       channel = supabase.channel(`${channelName}-${crypto.randomUUID()}`).on(
         "postgres_changes",
         { event: "*", schema: "public", table: "document_signatures", filter: filterFor("user_id") },
@@ -51,13 +53,42 @@ export function SignatureRequestsLiveRefresh({
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "document_submissions", filter: filterFor("submitted_by") },
           () => router.refresh(),
+=======
+      channel = supabase
+        .channel(`${channelName}-${randomId()}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "document_signatures", filter: filterFor("user_id") },
+          () => refreshSoon(),
+        );
+      if (includeSubmissions) {
+        channel = channel.on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "document_submissions",
+            filter: filterFor("submitted_by"),
+          },
+          () => refreshSoon(),
+>>>>>>> Stashed changes
         );
       }
       if (includeRequests) {
         channel = channel.on(
           "postgres_changes",
+<<<<<<< Updated upstream
           { event: "*", schema: "public", table: "document_requests", filter: filterFor("requested_user_id") },
           () => router.refresh(),
+=======
+          {
+            event: "*",
+            schema: "public",
+            table: "document_requests",
+            filter: filterFor("requested_user_id"),
+          },
+          () => refreshSoon(),
+>>>>>>> Stashed changes
         );
       }
       channel.subscribe();

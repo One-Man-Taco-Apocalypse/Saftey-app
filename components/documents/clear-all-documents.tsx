@@ -71,7 +71,7 @@ export function ClearAllDocuments() {
   }
 
   return (
-    <div className="mt-8 rounded-2xl border border-dashed border-red-400/50 p-4">
+    <div className="mt-8 rounded-xl border border-dashed border-red-400/50 p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">
         Testing only · temporary
       </p>
@@ -87,7 +87,7 @@ export function ClearAllDocuments() {
               setOpen(true);
               setResult(null);
             }}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-red-400/60 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-500/10 dark:text-red-400"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-red-400/60 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-500/10 dark:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
             Clear all document data
@@ -112,7 +112,7 @@ export function ClearAllDocuments() {
               onChange={(e) => setTyped(e.target.value)}
               autoComplete="off"
               autoFocus
-              className="h-10 min-w-0 flex-1 rounded-xl border border-white/70 bg-white/60 px-3 text-sm outline-none focus:ring-2 focus:ring-red-500/40 dark:border-white/15 dark:bg-white/10"
+              className="h-10 min-w-0 flex-1 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-red-500/40"
             />
             <button
               type="submit"
@@ -130,7 +130,7 @@ export function ClearAllDocuments() {
                 setError(null);
               }}
               disabled={working}
-              className="rounded-full border border-white/70 bg-white/60 px-4 py-2 text-sm font-medium transition hover:bg-white/90 dark:border-white/15 dark:bg-white/10"
+              className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition hover:bg-muted"
             >
               Cancel
             </button>

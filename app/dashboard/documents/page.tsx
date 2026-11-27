@@ -1,38 +1,79 @@
+<<<<<<< Updated upstream
 import { ChevronRight, Clock, FilePlus2, FileText } from "lucide-react";
+=======
+import { ChevronRight, FilePlus2, FileText, X } from "lucide-react";
+>>>>>>> Stashed changes
 import Link from "next/link";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
-import { GlassCard } from "@/components/dashboard/glass-card";
+import { Panel } from "@/components/dashboard/panel";
 import { ClearAllDocuments } from "@/components/documents/clear-all-documents";
+import { primaryButtonClass } from "@/components/documents/styles";
 import { LocalDate } from "@/components/local-date";
+<<<<<<< Updated upstream
 import { formatDocumentNumber } from "@/lib/documents";
+=======
+import { PageHeader } from "@/components/page-header";
+import { StatusPill } from "@/components/status-pill";
+import { documentTitle, formatDocumentNumber } from "@/lib/documents";
+>>>>>>> Stashed changes
 import { personName } from "@/lib/person";
 import { getPeople } from "@/lib/people";
 import { getProjects } from "@/lib/projects";
 import { getSignatureProgress, isAwaitingSignatures } from "@/lib/signatures";
+<<<<<<< Updated upstream
 import { getAllTemplates, getSubmissions, lookup } from "@/lib/submissions";
+=======
+import { getSubmissions } from "@/lib/submissions";
+import { getAllTemplates } from "@/lib/templates";
+import { cn, lookup } from "@/lib/utils";
 
-async function SubmissionList() {
+type SearchParams = Promise<{ q?: string | string[] }>;
+
+// Columns (wide screens): No. | Document | Project | Submitted by | Submitted | Status
+const columns =
+  "md:grid md:grid-cols-[4.5rem_minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_8.5rem_9.5rem_1.25rem] md:items-center md:gap-4";
+
+async function SubmissionList({ searchParams }: { searchParams: SearchParams }) {
+  const { q } = await searchParams;
+  const query = (Array.isArray(q) ? q[0] : q)?.trim() ?? "";
+>>>>>>> Stashed changes
+
   const [submissions, templates, projects, people] = await Promise.all([
     getSubmissions(),
     getAllTemplates(),
     getProjects(),
     getPeople(),
   ]);
-  const progress = await getSignatureProgress(submissions.map((s) => s.id));
   const templateById = lookup(templates, (t) => t.id);
   const projectByJob = lookup(projects, (p) => p.job_number);
   const personById = lookup(people, (p) => p.user_id);
 
-  if (submissions.length === 0) {
-    return (
-      <p className="rounded-2xl border border-dashed border-foreground/15 p-6 text-center text-sm text-muted-foreground">
-        No completed documents yet
-      </p>
-    );
-  }
+  const rows = submissions.map((s) => {
+    const template = templateById.get(s.template_id);
+    const project = s.job_number ? projectByJob.get(s.job_number) : undefined;
+    const person = s.submitted_by ? personById.get(s.submitted_by) : undefined;
+    return { s, template, project, person, title: documentTitle(s.answers, template?.name) };
+  });
+
+  // Search: title, type, number ("12" or "#12"), project name/number, submitter
+  const needle = query.toLowerCase().replace(/^#(?=\d)/, "");
+  const shown = needle
+    ? rows.filter((r) =>
+        [
+          r.title,
+          r.template?.name,
+          String(r.s.document_number),
+          r.s.job_number,
+          r.project?.job_name,
+          r.person && personName(r.person),
+        ].some((v) => v?.toLowerCase().includes(needle)),
+      )
+    : rows;
+  const progress = await getSignatureProgress(shown.map((r) => r.s.id));
 
   return (
+<<<<<<< Updated upstream
     <div className="divide-y divide-foreground/10 overflow-hidden rounded-2xl border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/5">
       {submissions.map((s) => {
         const template = templateById.get(s.template_id);
@@ -42,17 +83,50 @@ async function SubmissionList() {
           typeof s.answers.title === "string" && s.answers.title
             ? s.answers.title
             : template?.name ?? "Document";
+=======
+    <>
+      {query && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-muted-foreground">
+            {shown.length} {shown.length === 1 ? "result" : "results"} for
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/40 py-0.5 pl-2 pr-1 font-medium">
+            {query}
+            <Link
+              href="/dashboard/documents"
+              aria-label="Clear search"
+              className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Link>
+          </span>
+        </div>
+      )}
+>>>>>>> Stashed changes
 
-        return (
-          <Link
-            key={s.id}
-            href={`/dashboard/documents/${s.id}`}
-            className="group flex items-center gap-4 p-4 transition hover:bg-white/60 focus-visible:bg-white/60 focus-visible:outline-none dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
+      {shown.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          {query ? "No documents match your search" : "No completed documents yet"}
+        </p>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-border">
+          {/* Column headings (wide screens) */}
+          <div
+            className={cn(
+              columns,
+              "hidden border-b border-border bg-muted/50 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid",
+            )}
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-md shadow-black/10">
-              <FileText className="h-5 w-5" />
-            </span>
+            <span>No.</span>
+            <span>Document</span>
+            <span>Project</span>
+            <span>Submitted by</span>
+            <span>Submitted</span>
+            <span>Status</span>
+            <span />
+          </div>
 
+<<<<<<< Updated upstream
             <span className="min-w-0 flex-1">
               <span className="block truncate font-medium">
                 <span className="mr-1.5 tabular-nums text-muted-foreground">
@@ -81,59 +155,127 @@ async function SubmissionList() {
                 </span>
               </span>
             </span>
+=======
+          <ul className="divide-y divide-border">
+            {shown.map(({ s, template, project, person, title }) => {
+              const signing = progress.get(s.id);
+              const awaiting = signing && isAwaitingSignatures(signing);
+              return (
+                <li key={s.id}>
+                  <Link
+                    href={`/dashboard/documents/${s.id}`}
+                    className={cn(
+                      columns,
+                      "group flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none",
+                    )}
+                  >
+                    <span className="hidden font-medium tabular-nums text-muted-foreground md:block">
+                      {formatDocumentNumber(s.document_number)}
+                    </span>
+>>>>>>> Stashed changes
 
-            <span className="hidden shrink-0 flex-col items-end gap-1 text-xs text-muted-foreground sm:flex">
-              <span className="flex items-center gap-1.5">
-                {person && <Avatar color={person.color} className="h-5 w-5" />}
-                <span className="max-w-[10rem] truncate">
-                  {person ? personName(person) : "Unknown"}
-                </span>
-              </span>
-              <LocalDate iso={s.submitted_at} withTime />
-            </span>
+                    {/* Document: title + type. On phones this also carries the rest. */}
+                    <span className="flex min-w-0 flex-1 items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                        <FileText className="h-[1.125rem] w-[1.125rem]" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium">
+                          <span className="mr-1.5 tabular-nums text-muted-foreground md:hidden">
+                            {formatDocumentNumber(s.document_number)}
+                          </span>
+                          {title}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {template?.name ?? "Unknown template"}
+                          <span className="md:hidden">
+                            {" · "}
+                            <LocalDate iso={s.submitted_at} withTime />
+                          </span>
+                        </span>
+                      </span>
+                    </span>
 
-            <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
-          </Link>
-        );
-      })}
-    </div>
+                    <span className="hidden min-w-0 md:block">
+                      {s.job_number ? (
+                        <>
+                          <span className="block truncate">{project?.job_name ?? s.job_number}</span>
+                          <span className="block truncate text-xs text-muted-foreground">{s.job_number}</span>
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </span>
+
+                    <span className="hidden min-w-0 items-center gap-2 md:flex">
+                      {person && <Avatar color={person.color} className="h-6 w-6" />}
+                      <span className="truncate">{person ? personName(person) : "Unknown"}</span>
+                    </span>
+
+                    <span className="hidden text-muted-foreground md:block">
+                      <LocalDate iso={s.submitted_at} withTime />
+                    </span>
+
+                    <span className="shrink-0">
+                      {awaiting ? (
+                        <StatusPill tone="waiting" size="sm">
+                          Signatures {signing.signed}/{signing.total}
+                        </StatusPill>
+                      ) : (
+                        <StatusPill tone="complete" size="sm">
+                          Completed
+                        </StatusPill>
+                      )}
+                    </span>
+
+                    <ChevronRight className="hidden h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground md:block" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </>
   );
 }
 
 function ListSkeleton() {
   return (
-    <div className="flex flex-col gap-2">
-      {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="h-[4.5rem] animate-pulse rounded-2xl bg-foreground/5" />
+    <div className="overflow-hidden rounded-xl border border-border">
+      <div className="h-10 border-b border-border bg-muted/50" />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div key={i} className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-0">
+          <div className="h-9 w-9 animate-pulse rounded-lg bg-muted" />
+          <div className="h-4 w-48 animate-pulse rounded-full bg-muted" />
+        </div>
       ))}
     </div>
   );
 }
 
-export default function DocumentsPage() {
+export default function DocumentsPage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <div className="mx-auto w-full max-w-5xl p-4 md:p-8">
-      <GlassCard>
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Documents</h1>
-            <p className="mt-1 text-sm text-muted-foreground">All completed documents, newest first.</p>
-          </div>
-          <Link
-            href="/dashboard/documents/new"
-            className="flex shrink-0 items-center gap-1.5 rounded-full bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-sky-600/20 transition hover:bg-sky-700"
-          >
+    <div className="mx-auto w-full max-w-7xl p-4 md:p-8">
+      <PageHeader
+        title="Documents"
+        description="All completed documents, newest first."
+        breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Documents" }]}
+        actions={
+          <Link href="/dashboard/documents/new" className={cn(primaryButtonClass, "flex items-center gap-2")}>
             <FilePlus2 className="h-4 w-4" />
-            New
+            Create document
           </Link>
-        </div>
+        }
+      />
+      <Panel>
         <Suspense fallback={<ListSkeleton />}>
-          <SubmissionList />
+          <SubmissionList searchParams={searchParams} />
         </Suspense>
 
         {/* TEMPORARY: testing tool, remove later (see the component) */}
         <ClearAllDocuments />
-      </GlassCard>
+      </Panel>
     </div>
   );
 }

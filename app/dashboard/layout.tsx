@@ -1,12 +1,17 @@
-import { Sidebar } from "@/components/sidebar";
+import { Suspense } from "react";
+import { DashboardShell } from "@/components/shell/dashboard-shell";
+import {
+  NotificationBell,
+  NotificationBellSkeleton,
+  SidebarUser,
+  SidebarUserSkeleton,
+  TopBarUser,
+} from "@/components/shell/shell-user";
 
-// Wraps every screen under /dashboard with the sidebar and the background.
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// Wraps every screen under /dashboard with the sidebar and top bar.
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
+<<<<<<< Updated upstream
     <div className="relative min-h-svh">
       {/* Soft colored blobs behind everything. The glass cards blur these,
           which is what gives them the "liquid glass" look. */}
@@ -21,5 +26,26 @@ export default function DashboardLayout({
           slides over the content instead of pushing it around. */}
       <main className="pl-16">{children}</main>
     </div>
+=======
+    <DashboardShell
+      user={
+        <Suspense fallback={<SidebarUserSkeleton />}>
+          <SidebarUser />
+        </Suspense>
+      }
+      bell={
+        <Suspense fallback={<NotificationBellSkeleton />}>
+          <NotificationBell />
+        </Suspense>
+      }
+      avatar={
+        <Suspense>
+          <TopBarUser />
+        </Suspense>
+      }
+    >
+      {children}
+    </DashboardShell>
+>>>>>>> Stashed changes
   );
 }

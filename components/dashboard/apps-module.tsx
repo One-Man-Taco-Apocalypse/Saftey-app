@@ -1,6 +1,6 @@
-import { FilePlus2, Scale } from "lucide-react";
+import { FilePlus2, LayoutGrid, Scale } from "lucide-react";
 import Link from "next/link";
-import { Module } from "./module-grid";
+import { Module, ModuleHeader } from "./module-grid";
 
 // Quick links. Add more apps to this list; each gets an icon tile with its
 // title underneath. `gradient` is the tile color. Links to other websites
@@ -21,14 +21,12 @@ const apps = [
 ];
 
 const tileClass =
-  "group flex flex-col items-center gap-2 rounded-2xl p-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500";
+  "group flex flex-col items-center gap-2 rounded-xl p-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500";
 
 export function AppsModule() {
   return (
-    <Module size="full">
-      <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Apps
-      </p>
+    <Module size="medium">
+      <ModuleHeader title="Quick links" description="Shortcuts and outside resources" icon={LayoutGrid} />
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-4">
         {apps.map(({ title, href, icon: Icon, gradient }) => {
@@ -36,9 +34,9 @@ export function AppsModule() {
             <>
               {/* iOS-style rounded icon tile */}
               <span
-                className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-lg shadow-black/10 ring-1 ring-inset ring-white/30 transition duration-200 group-hover:-translate-y-0.5 group-hover:scale-105 group-active:scale-95`}
+                className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-lg shadow-black/10 ring-1 ring-inset ring-white/30 transition duration-200 group-hover:-translate-y-0.5 group-hover:scale-105 group-active:scale-95`}
               >
-                <Icon className="h-7 w-7" />
+                <Icon className="h-6 w-6" />
               </span>
               <span className="text-xs font-medium leading-tight">{title}</span>
             </>

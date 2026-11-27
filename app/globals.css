@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+<<<<<<< Updated upstream
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -45,16 +46,149 @@
     --muted-foreground: 0 0% 63.9%;
     --accent: 0 0% 14.9%;
     --accent-foreground: 0 0% 98%;
+=======
+/*
+  Themes. The chosen one is set as <html data-theme="..."> (see lib/themes.ts).
+
+  --sky-*      the accent colour scale (every `sky-` class in the app uses it)
+  --blue-600   the deep end of the icon tile gradients
+  --page-bg    the page background behind the cards
+  the rest     the standard shadcn/ui colour tokens (HSL). The app uses:
+               card (panels), muted (inner boxes, hovers), border, foreground
+*/
+
+@layer base {
+  /* Midnight: the original dark look (Tailwind's default sky blue).
+     Also used before a theme has been picked. */
+  :root,
+  [data-theme="midnight"] {
+    color-scheme: dark;
+
+    --sky-50: 240 249 255;
+    --sky-100: 224 242 254;
+    --sky-200: 186 230 253;
+    --sky-300: 125 211 252;
+    --sky-400: 56 189 248;
+    --sky-500: 14 165 233;
+    --sky-600: 2 132 199;
+    --sky-700: 3 105 161;
+    --sky-800: 7 89 133;
+    --sky-900: 12 74 110;
+    --sky-950: 8 47 73;
+    --blue-600: 37 99 235;
+
+    --page-bg: 2 6 23; /* slate-950 */
+
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%; /* slate-900 */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+>>>>>>> Stashed changes
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --border: 217 30% 20%;
+    --input: 217 30% 22%;
+    --ring: 199 89% 48%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+<<<<<<< Updated upstream
+=======
+    --radius: 0.5rem;
+  }
+
+  /* Accent scale built around #0075ba (= sky-600), shared by Light and Dark */
+  [data-theme="light"],
+  [data-theme="dark"] {
+    --sky-50: 238 248 253;
+    --sky-100: 215 238 250;
+    --sky-200: 176 220 244;
+    --sky-300: 120 195 235;
+    --sky-400: 54 163 220;
+    --sky-500: 11 138 203;
+    --sky-600: 0 117 186; /* #0075ba */
+    --sky-700: 0 95 152;
+    --sky-800: 0 79 125;
+    --sky-900: 5 66 103;
+    --sky-950: 3 42 67;
+    --blue-600: 0 90 143;
+  }
+
+  /* Light: bright, cool white with blue accents */
+  [data-theme="light"] {
+    color-scheme: light;
+
+    --page-bg: 244 246 249;
+
+    --background: 0 0% 100%;
+    --foreground: 205 60% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 205 60% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 205 60% 10%;
+    --primary: 202 100% 36.5%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 204 45% 94%;
+    --secondary-foreground: 205 60% 14%;
+    --muted: 210 30% 96%;
+    --muted-foreground: 215 14% 40%;
+    --accent: 204 60% 92%;
+    --accent-foreground: 205 70% 18%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 24% 90%;
+    --input: 214 22% 86%;
+    --ring: 202 100% 36.5%;
+    --chart-1: 202 100% 36.5%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  /* Dark: deep navy with blue accents */
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    --page-bg: 3 17 28;
+
+    --background: 206 70% 6%;
+    --foreground: 204 40% 96%;
+    --card: 206 55% 10%;
+    --card-foreground: 204 40% 96%;
+    --popover: 206 55% 10%;
+    --popover-foreground: 204 40% 96%;
+    --primary: 202 70% 52%;
+    --primary-foreground: 206 70% 6%;
+    --secondary: 206 45% 14%;
+    --secondary-foreground: 204 40% 96%;
+    --muted: 206 40% 14%;
+    --muted-foreground: 204 20% 68%;
+    --accent: 206 50% 16%;
+    --accent-foreground: 204 40% 96%;
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 206 38% 18%;
+    --input: 206 38% 22%;
+    --ring: 202 80% 55%;
+    --chart-1: 202 80% 55%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+>>>>>>> Stashed changes
   }
 }
 
@@ -63,6 +197,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    /* Grey page behind white cards (login pages included) */
+    background-color: rgb(var(--page-bg));
   }
 }

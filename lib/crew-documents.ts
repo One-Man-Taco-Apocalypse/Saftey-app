@@ -1,3 +1,13 @@
+<<<<<<< Updated upstream
+=======
+import { cache } from "react";
+import {
+  buildCrewDocuments,
+  type CrewDocRow,
+  type CrewDocument,
+  type CrewRequestRow,
+} from "@/lib/crew-status";
+>>>>>>> Stashed changes
 import { createClient } from "@/lib/supabase/server";
 
 // THIS person's status on a document:
@@ -23,12 +33,22 @@ const HOURS = 12;
 //  * documents from the last 12 hours they're on: ones they were asked to sign,
 //    plus ones they submitted
 //  * documents they've been asked to complete and haven't yet (any age, until done)
+<<<<<<< Updated upstream
 // Grouping and sorting is up to the UI.
 export async function getCrewDocuments(
   crewIds: string[],
 ): Promise<Record<string, CrewDocument[]>> {
   const result: Record<string, CrewDocument[]> = Object.fromEntries(crewIds.map((id) => [id, []]));
   if (crewIds.length === 0) return result;
+=======
+// The status logic is in crew-status.ts; grouping and sorting is up to the UI.
+// Cached per page: the stats row and the Crew card share it (they pass the same
+// crewIds array, from getUserSettings).
+export const getCrewDocuments = cache(async (
+  crewIds: string[],
+): Promise<Record<string, CrewDocument[]>> => {
+  if (crewIds.length === 0) return {};
+>>>>>>> Stashed changes
 
   const supabase = await createClient();
   const since = new Date(Date.now() - HOURS * 60 * 60 * 1000).toISOString();
@@ -57,6 +77,7 @@ export async function getCrewDocuments(
   if (docs.error) console.error("getCrewDocuments:", docs.error.message);
   if (requests.error) console.error("getCrewDocuments (requests):", requests.error.message);
 
+<<<<<<< Updated upstream
   type DocRow = {
     id: string;
     document_number: number;
@@ -117,3 +138,11 @@ export async function getCrewDocuments(
   }
   return result;
 }
+=======
+  return buildCrewDocuments(
+    crewIds,
+    (docs.data as CrewDocRow[] | null) ?? [],
+    (requests.data as unknown as CrewRequestRow[] | null) ?? [],
+  );
+});
+>>>>>>> Stashed changes

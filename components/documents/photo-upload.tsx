@@ -2,6 +2,7 @@
 
 import { ImagePlus, X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { randomId } from "@/lib/uuid";
 
 export type PhotoItem = { id: string; file: File; previewUrl: string };
 
@@ -22,17 +23,14 @@ export function PhotoUpload({
   useEffect(() => {
     photosRef.current = photos;
   }, [photos]);
-  useEffect(
-    () => () => photosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl)),
-    [],
-  );
+  useEffect(() => () => photosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl)), []);
 
   function addFiles(files: FileList | null) {
     if (!files) return;
     const added = Array.from(files)
       .filter((f) => f.type.startsWith("image/"))
       .map((file) => ({
-        id: crypto.randomUUID(),
+        id: randomId(),
         file,
         previewUrl: URL.createObjectURL(file),
       }));
@@ -51,7 +49,7 @@ export function PhotoUpload({
         {photos.map((photo) => (
           <div
             key={photo.id}
-            className="relative aspect-square overflow-hidden rounded-xl border border-white/60 dark:border-white/10"
+            className="relative aspect-square overflow-hidden rounded-xl border border-border"
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- local preview, not a hosted image */}
             <img src={photo.previewUrl} alt={photo.file.name} className="h-full w-full object-cover" />
@@ -69,7 +67,7 @@ export function PhotoUpload({
         {/* Add photo tile */}
         <label
           htmlFor={id}
-          className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-foreground/15 text-muted-foreground transition hover:border-sky-400 hover:bg-sky-500/5 hover:text-sky-600"
+          className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-border text-muted-foreground transition hover:border-sky-400 hover:bg-sky-500/5 hover:text-sky-600"
         >
           <ImagePlus className="h-6 w-6" />
           <span className="text-xs font-medium">Add photo</span>

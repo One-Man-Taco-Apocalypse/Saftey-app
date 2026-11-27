@@ -5,7 +5,7 @@ import { useState } from "react";
 import { saveUserSettings } from "@/lib/save-settings";
 import type { Project } from "@/lib/projects";
 import { cn } from "@/lib/utils";
-import { Module } from "./module-grid";
+import { Module, ModuleHeader } from "./module-grid";
 import { PopupButton } from "./popup";
 
 function StarButton({
@@ -24,7 +24,7 @@ function StarButton({
       disabled={disabled}
       aria-pressed={favorite}
       aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-foreground/5 active:scale-90 disabled:opacity-60"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-muted active:scale-90 disabled:opacity-60"
     >
       <Star
         className={cn(
@@ -61,10 +61,7 @@ export function ProjectModuleClient({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  async function save(changes: {
-    current_project?: string;
-    favorite_projects?: string[];
-  }) {
+  async function save(changes: { current_project?: string; favorite_projects?: string[] }) {
     setSaving(true);
     const error = await saveUserSettings(userId, changes);
     setSaving(false);
@@ -98,36 +95,29 @@ export function ProjectModuleClient({
   // (a submit button inside <form method="dialog"> closes its dialog).
   const projectList =
     projects.length === 0 ? (
-      <p className="rounded-2xl border border-dashed border-foreground/15 p-4 text-center text-sm text-muted-foreground">
+      <p className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
         No projects found
       </p>
     ) : (
       <form
         method="dialog"
-        className="divide-y divide-foreground/10 overflow-hidden rounded-2xl border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/5"
+        className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-muted/40"
       >
         {projects.map((project) => {
           const isCurrent = project.job_number === current;
           return (
             <div
               key={project.job_number}
-              className={cn(
-                "flex items-center gap-2 py-1.5 pl-1.5 pr-2",
-                isCurrent && "bg-sky-500/10",
-              )}
+              className={cn("flex items-center gap-2 py-1.5 pl-1.5 pr-2", isCurrent && "bg-sky-500/10")}
             >
               <button
                 type="submit"
                 onClick={() => setCurrentProject(project.job_number)}
-                className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2.5 py-1.5 text-left transition hover:bg-foreground/5"
+                className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2.5 py-1.5 text-left transition hover:bg-muted"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium">
-                    {project.job_name}
-                  </span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {project.job_number}
-                  </span>
+                  <span className="block truncate text-sm font-medium">{project.job_name}</span>
+                  <span className="block truncate text-xs text-muted-foreground">{project.job_number}</span>
                 </span>
                 {isCurrent && <CurrentBadge />}
               </button>
@@ -144,46 +134,42 @@ export function ProjectModuleClient({
 
   return (
     <Module size="medium">
-      <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400">
-          <FolderKanban className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-muted-foreground">
-            Current Project:
-          </p>
-          {/* Only the project name opens the project popup (blank for now) */}
+      <ModuleHeader
+        title="Current project"
+        icon={FolderKanban}
+        action={
+          // Opens the project list, where a project can be made current
           <PopupButton
-            title={currentProject?.job_name ?? "Project"}
-            className="group -mx-2 mt-0.5 flex w-[calc(100%+1rem)] items-center gap-1 px-2"
+            title="Change Project"
+            popup={projectList}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
           >
-            <span
-              className={cn(
-                "min-w-0 flex-1 truncate text-2xl font-semibold tracking-tight",
-                !currentProject && "text-muted-foreground",
-              )}
-            >
-              {currentProject?.job_name ?? "No project selected"}
-            </span>
-            <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
+            <Pencil className="h-3.5 w-3.5" />
+            Change project
           </PopupButton>
-          {currentProject && (
-            <p className="text-xs text-muted-foreground">
-              {currentProject.job_number}
-            </p>
-          )}
-        </div>
+        }
+      />
 
-        {/* Opens the project list, where a project can be made current */}
-        <PopupButton
-          title="Change Project"
-          popup={projectList}
-          className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/70 bg-white/60 px-3 py-1.5 text-sm font-medium hover:bg-white/90 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-          Change project
-        </PopupButton>
-      </div>
+      {/* Only the project name opens the project popup (blank for now) */}
+      <PopupButton
+        title={currentProject?.job_name ?? "Project"}
+        className="group -mx-2 flex w-[calc(100%+1rem)] items-center gap-1 px-2 py-1"
+      >
+        <span className="min-w-0 flex-1">
+          <span
+            className={cn(
+              "block truncate text-xl font-semibold tracking-tight",
+              !currentProject && "text-muted-foreground",
+            )}
+          >
+            {currentProject?.job_name ?? "No project selected"}
+          </span>
+          {currentProject && (
+            <span className="block text-xs text-muted-foreground">Job {currentProject.job_number}</span>
+          )}
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
+      </PopupButton>
 
       {/* Favorite projects. The heading opens the Favorite Projects popup;
           each favorite has its own "Set current" button. */}
@@ -197,7 +183,7 @@ export function ProjectModuleClient({
         </PopupButton>
 
         {favoriteProjects.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-foreground/15 p-4 text-center text-sm text-muted-foreground">
+          <p className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
             You have no Favorite projects
           </p>
         ) : (
@@ -205,16 +191,12 @@ export function ProjectModuleClient({
             {favoriteProjects.map((project) => (
               <div
                 key={project.job_number}
-                className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/50 p-3 dark:border-white/10 dark:bg-white/5"
+                className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3"
               >
                 <Star className="h-4 w-4 shrink-0 fill-amber-400 text-amber-400" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {project.job_name}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {project.job_number}
-                  </p>
+                  <p className="truncate text-sm font-medium">{project.job_name}</p>
+                  <p className="truncate text-xs text-muted-foreground">{project.job_number}</p>
                 </div>
                 {project.job_number === current ? (
                   <CurrentBadge />
@@ -222,7 +204,7 @@ export function ProjectModuleClient({
                   <button
                     type="button"
                     onClick={() => setCurrentProject(project.job_number)}
-                    className="shrink-0 rounded-full border border-white/70 bg-white/60 px-3 py-1 text-xs font-medium transition hover:bg-white/90 active:scale-95 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15"
+                    className="shrink-0 rounded-lg border border-border bg-card px-3 py-1 text-xs font-medium transition hover:bg-muted active:scale-95"
                   >
                     Set current
                   </button>

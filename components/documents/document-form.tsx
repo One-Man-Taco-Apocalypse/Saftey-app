@@ -401,7 +401,7 @@ export function DocumentForm({
       <button
         type="submit"
         disabled={submitting}
-        className="mt-2 flex h-11 items-center justify-center gap-2 rounded-full bg-sky-600 font-medium text-white shadow-lg shadow-sky-600/20 transition hover:bg-sky-700 active:scale-[0.99] disabled:opacity-70"
+        className="mt-2 flex h-11 items-center justify-center gap-2 rounded-lg bg-sky-600 font-medium text-white shadow-lg shadow-sky-600/20 transition hover:bg-sky-700 active:scale-[0.99] disabled:opacity-70"
       >
         {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
         {submitting ? "Submitting…" : "Submit"}

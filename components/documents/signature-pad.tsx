@@ -78,7 +78,7 @@ export function SignaturePad({
     <div>
       <div
         className={cn(
-          "relative overflow-hidden rounded-xl border border-white/70 bg-white dark:border-white/15",
+          "relative overflow-hidden rounded-xl border border-border bg-white",
           invalid && "border-red-400 dark:border-red-400",
         )}
       >
@@ -105,7 +105,7 @@ export function SignaturePad({
           type="button"
           onClick={clear}
           disabled={!hasInk}
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground transition hover:bg-foreground/5 hover:text-foreground disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
         >
           <Eraser className="h-3.5 w-3.5" />
           Clear

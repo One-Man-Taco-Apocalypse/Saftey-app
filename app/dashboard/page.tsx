@@ -1,47 +1,36 @@
 import { Suspense } from "react";
-import { ModuleGrid } from "@/components/dashboard/module-grid";
 import { AppsModule } from "@/components/dashboard/apps-module";
-import {
-  PersonCard,
-  PersonCardSkeleton,
-} from "@/components/dashboard/person-card";
-import {
-  ProjectModule,
-  ProjectModuleSkeleton,
-} from "@/components/dashboard/project-module";
-import {
-  CrewModule,
-  CrewModuleSkeleton,
-} from "@/components/dashboard/crew-module";
-import {
-  SignaturesModule,
-  SignaturesModuleSkeleton,
-} from "@/components/dashboard/signatures-module";
+import { CrewModule, CrewModuleSkeleton } from "@/components/dashboard/crew-module";
+import { DashboardStats, DashboardStatsSkeleton } from "@/components/dashboard/dashboard-stats";
+import { ModuleGrid } from "@/components/dashboard/module-grid";
+import { ProjectModule, ProjectModuleSkeleton } from "@/components/dashboard/project-module";
+import { SignaturesModule, SignaturesModuleSkeleton } from "@/components/dashboard/signatures-module";
 
+// Dashboard tab: My Overview
 export default function DashboardPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl p-4 md:p-8">
-      <ModuleGrid>
-        <Suspense fallback={<PersonCardSkeleton />}>
-          <PersonCard />
-        </Suspense>
+    <ModuleGrid>
+      {/* Row of numbers */}
+      <Suspense fallback={<DashboardStatsSkeleton />}>
+        <DashboardStats />
+      </Suspense>
 
-        <AppsModule />
+      {/* What needs doing first, then the crew */}
+      <Suspense fallback={<SignaturesModuleSkeleton />}>
+        <SignaturesModule />
+      </Suspense>
+      <Suspense fallback={<CrewModuleSkeleton />}>
+        <CrewModule />
+      </Suspense>
 
-        <Suspense fallback={<ProjectModuleSkeleton />}>
-          <ProjectModule />
-        </Suspense>
-        <Suspense fallback={<CrewModuleSkeleton />}>
-          <CrewModule />
-        </Suspense>
-        <Suspense fallback={<SignaturesModuleSkeleton />}>
-          <SignaturesModule />
-        </Suspense>
+      <Suspense fallback={<ProjectModuleSkeleton />}>
+        <ProjectModule />
+      </Suspense>
+      <AppsModule />
 
-        {/* Add more modules here, e.g.
-            <Module size="small">...</Module>
-            <Module size="medium">...</Module> */}
-      </ModuleGrid>
-    </div>
+      {/* Add more modules here, e.g.
+          <Module size="small">...</Module>
+          <Module size="medium">...</Module> */}
+    </ModuleGrid>
   );
 }

@@ -1,5 +1,11 @@
+<<<<<<< Updated upstream
 # Saftey-app
 testing saftey docs
+=======
+# Risky Business
+
+**Site Management and Safety Documentation**
+>>>>>>> Stashed changes
 
 <a href="https://demo-nextjs-with-supabase.vercel.app/">
   <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
@@ -102,12 +108,50 @@ Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can b
 
 > Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
 
+<<<<<<< Updated upstream
 ## Feedback and issues
+=======
+components/
+  shell/                  Sidebar, top bar (search, notification bell), user
+  page-header.tsx         Page title + breadcrumbs + action buttons
+  dashboard/              Dashboard cards ("modules"), stat cards, Panel (the
+                          white card everything sits in), popups, live refresh
+    crew/                 Pieces of the Crew card
+  documents/              Document form, signature pad/table, dropdowns
+    form/                 One field's input / layout, the "Submitted" screen
+    view/                 How each answer is shown on a finished document
+  status-pill.tsx         Complete / Waiting / Requested badges
+  ui/                     Basic shadcn/ui pieces (used by the auth pages)
+>>>>>>> Stashed changes
 
 Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
 
 ## More Supabase examples
 
+<<<<<<< Updated upstream
 - [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
 - [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
 - [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+=======
+## Adding things
+
+- **A new field type**: add it to `FieldType` in `lib/documents.ts`, draw its input
+  in `components/documents/form/field-input.tsx`, its answer in
+  `components/documents/view/answer-view.tsx`, and any save/validation rules in
+  `lib/forms.ts`. Add it to `ALL_TYPES` in `components/documents/render.test.tsx`.
+- **A new form (template)**: a migration that inserts into `document_templates` and
+  `document_template_versions` (see `20261125000019_psa_template.sql`).
+- **A new dashboard card**: a component in `components/dashboard/`, wrapped in
+  `<Module size="…">` with a `<ModuleHeader>` on top, added to
+  `app/dashboard/page.tsx` inside a `<Suspense>`.
+- **A new sidebar link**: `sections` in `components/shell/sidebar-nav.tsx`.
+- **A new theme**: `lib/themes.ts` + a `[data-theme="…"]` block in `app/globals.css`
+  (and `tailwind.config.ts` `darkMode` if it's dark).
+
+## Temporary
+
+The "Clear all document data" button on the Documents page is for testing only.
+To remove it: delete `components/documents/clear-all-documents.tsx`, its
+`<ClearAllDocuments />` on `app/dashboard/documents/page.tsx`, and run
+`drop function if exists public.dev_clear_all_documents(text);`.
+>>>>>>> Stashed changes

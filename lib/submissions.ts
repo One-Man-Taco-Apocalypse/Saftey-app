@@ -74,8 +74,23 @@ export async function getFileUrls(paths: string[]): Promise<Record<string, strin
   );
 }
 
+<<<<<<< Updated upstream
 export function lookup<T>(items: T[], key: (item: T) => string) {
   return new Map(items.map((item) => [key(item), item]));
 }
 
 export type { Person, Project };
+=======
+// How many documents were submitted in the last `hours` hours (counted in the
+// database; no rows are downloaded).
+export const countRecentSubmissions = cache(async (hours: number): Promise<number> => {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+  const { count, error } = await supabase
+    .from("document_submissions")
+    .select("id", { count: "exact", head: true })
+    .gte("submitted_at", since);
+  if (error) console.error("countRecentSubmissions:", error.message);
+  return count ?? 0;
+});
+>>>>>>> Stashed changes
